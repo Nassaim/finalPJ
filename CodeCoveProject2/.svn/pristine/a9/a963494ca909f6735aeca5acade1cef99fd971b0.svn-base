@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	    <setting name="jdbcTypeForNull" value="NULL" />   
+	</settings>
+	
+	<typeAliases>
+		
+		<typeAlias type="kr.or.ddit.expert.vo.ExpertProdVO" alias="ExpertProdVO"/>
+	
+		<typeAlias type="kr.or.ddit.member.vo.MemberVO" alias="MemberVO"/>
+		<typeAlias type="kr.or.ddit.member.vo.MemberRole" alias="MemberRole"/>
+		
+		<typeAlias type="kr.or.ddit.blog.vo.BlogCateVO" alias="BlogCateVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.BlogHeartVO" alias="BlogHeartVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.BlogReplyVO" alias="BlogReplyVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.CreateBlogVO" alias="CreateBlogVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.MyBlogPostVO" alias="MyBlogPostVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.MyCalendarVO" alias="MyCalendarVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.PostMarkVO" alias="PostMarkVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.ThumbnailVO" alias="ThumbnailVO"/>
+		<typeAlias type="kr.or.ddit.blog.vo.TodoVO" alias="TodoVO"/>
+		
+		<typeAlias type="kr.or.ddit.project.colleague.vo.ColleagueVO" alias="ColleagueVO"/>
+
+		<typeAlias type="kr.or.ddit.project.project.vo.ProjectVO" alias="ProjectVO"/>
+		<typeAlias type="kr.or.ddit.project.work.vo.WorkVO" alias="WorkVO"/>
+		<typeAlias type="kr.or.ddit.project.workAssign.vo.workAssignVO" alias="WorkAssignVO"/>
+		<typeAlias type="kr.or.ddit.project.issue.vo.IssueVO" alias="IssueVO"/>
+		
+		<typeAlias type="kr.or.ddit.project.folder.vo.ProjectFolderVO" alias="ProjectFolderVO"/>
+		<typeAlias type="kr.or.ddit.project.folder.vo.ProjectFileVO" alias="ProjectFileVO"/>
+
+
+		<typeAlias type="kr.or.ddit.admin.vo.ComCodeVO" alias="comCodeVO"/>
+		<typeAlias type="kr.or.ddit.member.vo.ExpertVO" alias="ExpertVO"/>
+		<typeAlias type="kr.or.ddit.mainpage.vo.QnAVO" alias="qnaVO"/>
+		<typeAlias type="kr.or.ddit.mainpage.vo.NoticeVO" alias="NoticeVO"/>
+		<typeAlias type="kr.or.ddit.admin.vo.StatisticsVO" alias="StatisticsVO"/>
+		
+		
+		<typeAlias type="kr.or.ddit.common.AttatchVO" alias="AttatchVO"/>
+		<typeAlias type="kr.or.ddit.common.PaginationInfoVO" alias="PaginationInfoVO"/>
+		
+		
+		<typeAlias type="kr.or.ddit.board.vo.FreeBoardVO" alias="FreeBoardVO"/>
+		
+		<typeAlias type="kr.or.ddit.expert.vo.MyExpertVO" alias="MyExpertVO"/>
+		
+		<typeAlias type="kr.or.ddit.board.vo.BoReplyVO" alias="BoReplyVO"/>
+		
+		<typeAlias type="kr.or.ddit.expert.vo.TemplateReviewVO" alias="TemplateReviewVO"/>
+		
+		<typeAlias type="kr.or.ddit.board.vo.CooBoardVO" alias="CooBoardVO"/>
+		
+		<typeAlias type="kr.or.ddit.member.vo.MyReplyVO" alias="MyReplyVO"/>
+		
+		<typeAlias type="kr.or.ddit.member.vo.MyChartVO" alias="MyChartVO"/>
+		
+		<typeAlias type="kr.or.ddit.expert.vo.ExpHeartVO" alias="ExpHeartVO"/>
+		
+		<typeAlias type="kr.or.ddit.common.ReportVO" alias="ReportVO"/>
+		
+		<typeAlias type="kr.or.ddit.expert.vo.MentoProfileVO" alias="MentoProfileVO"/>
+		
+        <typeAlias type="kr.or.ddit.common.chat.vo.ChatVO" alias="ChatVO"/>
+		
+		<typeAlias type="kr.or.ddit.board.vo.CooFormVO" alias="CooFormVO"/>
+		
+		<typeAlias type="kr.or.ddit.common.chat.vo.AlarmVO" alias="AlarmVO"/>
+		
+	</typeAliases>
+	
+</configuration>

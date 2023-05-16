@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+	
+	<definition name="mainTemplate" template="/WEB-INF/views/mainTemplate.jsp">
+		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp" />
+	</definition>
+	
+	<definition name="mainpages/*/*" extends="mainTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/mainpages/{1}/{2}.jsp" />
+	</definition>
+	
+	
+	<definition name="loginTemplate" template="/WEB-INF/views/loginTemplate.jsp">
+		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp" />
+	</definition>
+	
+	<definition name="logins/*" extends="loginTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/logins/{1}.jsp" />
+	</definition>
+ 
+<!-- solutionTemplate Header 시작 -->
+	
+	<definition name="solutionTemplate" template="/WEB-INF/views/solutionTemplate.jsp">
+		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp" />
+	</definition>
+	
+	<definition name="solutions/*" extends="solutionTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/solutions/{1}.jsp" />
+	</definition>	
+
+<!-- solutionTemplate Header 끝 -->
+
+
+	
+	  
+	<definition name="mypageTemplate" template="/WEB-INF/views/mypageTemplate.jsp">
+<!-- 		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp" /> -->
+		<put-attribute name="miniHeader" value="/WEB-INF/views/member/miniHeader.jsp" />
+		<put-attribute name="sidebar" value="/WEB-INF/views/member/sidebar.jsp" />
+	</definition>
+	
+	<definition name="member/*" extends="mypageTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/member/{1}.jsp" />
+	</definition>
+	
+	
+	<definition name="blogTemplate" template="/WEB-INF/views/blogTemplate.jsp">
+		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp" />
+	</definition>
+	
+	
+	<definition name="myblog/*" extends="blogTemplate">
+		<put-attribute name="blogList" value="/WEB-INF/views/blog/blogList.jsp" />
+		<put-attribute name="content" value="/WEB-INF/views/myblog/{1}.jsp" />
+	</definition>
+	<definition name="blogManage/*" extends="blogTemplate">
+		<put-attribute name="blogList" value="/WEB-INF/views/blog/manageList.jsp" />
+		<put-attribute name="content" value="/WEB-INF/views/blogManage/{1}.jsp" />
+	</definition>
+	<definition name="blog/*" extends="blogTemplate">
+		<put-attribute name="blogList" value="/WEB-INF/views/blog/blogList.jsp" />
+		<put-attribute name="content" value="/WEB-INF/views/blog/{1}.jsp" />
+	</definition>
+	
+	<definition name="adminTemplate" template="/WEB-INF/views/adminTemplate.jsp">
+		<put-attribute name="mainHeader" value="/WEB-INF/views/commons/header.jsp" />
+		<put-attribute name="sidebar" value="/WEB-INF/views/admins/sidebar.jsp" />
+		<put-attribute name="header" value="/WEB-INF/views/admins/header.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/views/admins/footer.jsp" />
+	</definition>
+	
+	<definition name="admins/*/*" extends="adminTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/admins/{1}/{2}.jsp"/>
+	</definition>
+	
+	<definition name="projectTemplate" template="/WEB-INF/views/projectTemplate.jsp">
+		<put-attribute name="sidebar" value="/WEB-INF/views/projects/aside.jsp" />
+		<put-attribute name="header" value="/WEB-INF/views/projects/header.jsp" />
+		<put-attribute name="mainHeader" value="/WEB-INF/views/commons/header.jsp" />
+	</definition>
+	
+	<definition name="project/*" extends="projectTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/project/{1}.jsp"/>
+	</definition>
+	
+	<definition name="boardTemplate" template="/WEB-INF/views/freeBoardTemplate.jsp">
+		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp"/>
+	</definition>
+	
+	<definition name="board/*/*" extends="boardTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/board/{1}/{2}.jsp"/>
+	</definition>
+	
+	<definition name="alarmTemplate" template="/WEB-INF/views/alarmTemplate.jsp">
+		<put-attribute name="sidebar" value="/WEB-INF/views/projects/aside.jsp" />
+		<put-attribute name="header" value="/WEB-INF/views/projects/header.jsp" />
+		<put-attribute name="mainHeader" value="/WEB-INF/views/commons/header.jsp" />
+	</definition>
+	
+	<definition name="chat/alarm/*" extends="alarmTemplate">
+		<put-attribute name="content" value="/WEB-INF/views/chat/alarm/{1}.jsp"/>
+	</definition>
+	
+	
+
+	
+<!-- 	<definition name="freeBoardTemplate" template="/WEB-INF/views/freeBoardTemplate.jsp"> -->
+<!-- 		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp" /> -->
+<!-- 	</definition> -->
+	
+<!-- 	<definition name="board/freeBoard/*" extends="freeBoardTemplate"> -->
+<!-- 		<put-attribute name="content" value="/WEB-INF/views/board/freeBoard/{1}.jsp" /> -->
+<!-- 	</definition> -->
+	
+<!-- 	<definition name="blogBoardTemplate" template="/WEB-INF/views/blogBoardTemplate.jsp"> -->
+<!-- 		<put-attribute name="header" value="/WEB-INF/views/commons/header.jsp" /> -->
+<!-- 	</definition> -->
+	
+<!-- 	<definition name="board/blogBoard/*" extends="blogBoardTemplate"> -->
+<!-- 		<put-attribute name="content" value="/WEB-INF/views/board/blogBoard/{1}.jsp" /> -->
+<!-- 	</definition> -->
+
+<!-- 	<definition name="publicBlog/*" extends="header">		 -->
+<!-- 		<put-attribute name="content" value="/WEB-INF/views/publicBlog/{1}.jsp" /> -->
+<!-- 	</definition> -->
+	
+</tiles-definitions>

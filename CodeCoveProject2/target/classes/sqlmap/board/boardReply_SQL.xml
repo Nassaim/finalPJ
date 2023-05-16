@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.board.BoardReplyMapper">
+
+	<select id="selectBoReplyList" resultType="BoReplyVO" parameterType="String">
+		SELECT
+    	bo_reply_num,
+    	bo_reply_target,
+    	writer_id,
+    	bo_reply_content,
+    	to_char(bo_reply_date,'yyyy.mm.dd  hh24:mi') as bo_reply_date,
+		from
+    	tb_board_reply
+		where free_num=#{freeNum}
+	
+	</select>
+	
+	<insert id="insertBoReply" parameterType="BoReplyVO">
+		<selectKey keyProperty="boReplyNum" keyColumn="BO_REPLY_NUM" order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(SYSDATE,'YYMMDD'), 'TB_BOARD_REPLY', 'BO_REPLY_NUM', UPPER('BORE'))
+			FROM DUAL
+		</selectKey>
+		insert into tb_board_reply (
+	    	bo_reply_num,
+	    	writer_id,
+	   		bo_reply_target,
+	    	bo_reply_content
+		) values (
+   		 #{boReplyNum} ,
+    	 #{boReplyWriter},
+   		 #{boReplyTarget},
+    	 #{boReplyContent}
+		)
+	</insert>
+
+</mapper>

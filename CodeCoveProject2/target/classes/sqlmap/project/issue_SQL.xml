@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.project.IIssueMapper">
+
+	<insert id="register" parameterType="IssueVO">
+		<selectKey keyProperty="issueNum" keyColumn="ISSUE_NUM"
+			order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_ISSUE', 'ISSUE_NUM', UPPER('ISSU'))
+			FROM DUAL
+		</selectKey>
+		insert into tb_issue(
+			ISSUE_NUM, WORK_NUM, ISSUE_CONTENT, ISSUE_DATE, ISSUE_REQ
+		)values(
+			#{issueNum}, #{workNum}, #{issueContent}, sysdate, #{issueReq}
+		)
+	</insert>
+
+	<select id="list" parameterType="IssueVO" resultType="IssueVO">
+		select
+		    issue_num, i.work_num, issue_content, issue_date, issue_req
+			from tb_work w left outer join tb_issue i on(w.work_num = i.work_num)
+		where 1=1
+		and w.PJ_ID= #{pjId}
+		and i.work_num = #{workNum}
+		order by issue_date
+	</select>
+	
+	<select id="issueList" parameterType="String" resultType="IssueVO">
+		select
+		    issue_num, work_num, issue_content,
+		    to_char(ISSUE_DATE, 'yy-mm-dd hh24:mi') issue_date, issue_req
+		from tb_issue 
+		where 1=1
+		and work_num = #{workNum}
+		order by issue_date
+	</select>
+	
+	<select id="detail" parameterType="String" resultType="IssueVO">
+		select
+		    issue_num, work_num, issue_content, 
+		    to_char(ISSUE_DATE, 'yy-mm-dd hh24:mi')issue_date, issue_req
+		from tb_issue 
+		where 1=1
+		and issue_num = #{issue_num}
+	</select>
+	
+	<delete id="delete" parameterType="String">
+		delete from tb_issue
+		where issue_num = #{issueNum}
+	</delete>
+
+	<delete id="allDelete" parameterType="String">
+		delete from tb_issue
+		where work_num = #{workNum}
+	</delete>
+</mapper>

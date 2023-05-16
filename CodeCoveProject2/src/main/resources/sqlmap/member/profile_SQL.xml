@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.member.ProfileMapper">
+
+	<select id="selectMember" parameterType="MemberVO" resultType="MemberVO">
+		select
+			MEM_ID, MEM_PASS, MEM_NAME, MEM_NICK, MEM_MAIL, MEM_HP, REPORT, MEM_PROFILE, MEMEXP_YN
+		from tb_member
+		where mem_id = #{memId}
+	</select>
+	
+	<select id="passCheck" parameterType="string" resultType="MemberVO">
+		select 
+			MEM_ID, MEM_PASS, MEM_NAME, MEM_NICK, MEM_MAIL, MEM_HP, REPORT, MEM_PROFILE, MEMEXP_YN
+		from TB_MEMBER
+		where mem_id = #{memId}
+	</select>
+	
+	
+	<update id="profileUpdate" parameterType="MemberVO">
+		update tb_member
+		set
+			MEM_PASS = #{memPass},
+			MEM_NAME = #{memName},
+			MEM_NICK = #{memNick},
+			MEM_MAIL = #{memMail},
+			MEM_HP = #{memHP},
+			REPORT = #{report}
+		<if test="memProfile != null and memProfile != ''">
+			,mem_profile = #{memProfile}
+		</if>
+		where mem_id = #{memId}
+	</update>
+
+
+	<insert id="userOut" parameterType="String" >
+		insert into tb_delmember (
+			mem_id, del_date
+		) values (
+			#{memId}, sysdate)
+	</insert>
+
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.board.FreeBoardMapper">
+
+	<sql id="boardSearch">
+		<if test="searchType !=null and searchType == 'title'">
+			and(free_title like '%' || #{searchWord}||'%')
+		</if>
+		<if test="searchType !=null and searchType == 'writer'">
+			and(writer_id like '%' || #{searchWord}||'%')
+		</if>
+	</sql>
+
+	<!--자유 게시판 게시글 수 조회 -->
+	<select id="countFreeBoList" parameterType="PaginationInfoVO"
+		resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		tb_freeboard A
+		WHERE
+		1=1
+		<if test="searchWord != null and searchWord != ''">
+			AND
+			( INSTR(A.writer_id, #{searchWord}) > 0
+			OR
+			INSTR(A.free_title, #{searchWord}) > 0)
+
+		</if>
+	</select>
+
+	<!--자유 게시판 게시글 리스트 조회 -->
+	<select id="selectFreeBoList" parameterType="PaginationInfoVO"
+		resultType="FreeBoardVO">
+		select
+		b.*
+		from
+		(SELECT
+		A.*, ROW_NUMBER() OVER(ORDER BY A.FREE_DATE DESC) RNUM
+		FROM
+		(select
+		a.FREE_NUM
+		, a.WRITER_ID
+		, a.FREE_TITLE
+		, a.FREE_CONTENT
+		, to_char(a.FREE_DATE,'yy-mm-dd') FREE_DATE
+		, a.REP_NUM
+		, a.VIEW_NUM
+		, c.mem_nick
+		from
+		TB_FREEBOARD a
+		left outer join tb_member c on(a.writer_id=c.mem_id)
+		where 1=1
+		<if test="searchWord != null and searchWord != ''">
+			AND (INSTR(A.WRITER_ID, #{searchWord}) > 0 OR INSTR(A.FREE_TITLE,
+			#{searchWord}) > 0)
+		</if>
+		ORDER BY A.FREE_DATE DESC
+		) A
+		) B
+		WHERE
+		RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+
+
+	<insert id="insertFreeBoard" parameterType="FreeBoardVO"
+		useGeneratedKeys="true">
+		<selectKey keyProperty="freeNum" keyColumn="free_num"
+			order="BEFORE" resultType="String">
+			select
+			fn_create_num(to_char(sysdate,'yymmdd'), 'tb_freeboard', 'free_num',
+			UPPER('free'))
+			FROM DUAL
+		</selectKey>
+		insert into tb_freeboard(
+		free_num, writer_id, free_title,
+		free_content, free_date, rep_num, view_num
+		)values(
+		#{freeNum},
+		#{writerId}, #{freeTitle}, #{freeContent}, sysdate, 0, 0
+		)
+	</insert>
+
+	<select id="read" parameterType="String"
+		resultType="FreeBoardVO">
+		select
+		free_num
+		, a.writer_id
+		, a.free_title
+		, a.free_content
+		, a.free_date
+		, a.rep_num
+		, a.view_num
+		, b.mem_nick
+		from tb_freeboard a
+		left outer join tb_member b on(a.writer_id=b.mem_id)
+		where free_num=#{freeNum}
+	</select>
+
+	<update id="incrementHit" parameterType="String">
+		update tb_freeboard
+		set
+		view_num= view_num+1
+		where free_num=#{freeNum}
+	</update>
+
+
+
+	<!--아이디, 제목, 내용(첨부파일 포함) 불러오기 -->
+	<resultMap type="FreeBoardVO" id="freeMap" autoMapping="true">
+		<id property="freeNum" column="free_num" />
+		<collection property="attatchList" ofType="AttatchVO"
+			autoMapping="true" />
+	</resultMap>
+
+	<select id="selectFreeBoard" resultMap="freeMap"
+		parameterType="map">
+		select
+		a.free_num
+		, a.free_title
+		, a.free_content
+		, a.writer_id
+		, to_char(a.free_date,'yyyy.mm.dd hh24:mi') as free_date
+		, b.attatch_num
+		, b.attatch_order
+		, b.file_path
+		, b.origin_nm
+		, b.save_nm
+		, b.attatch_type
+		, b.attatch_size
+		, b.attatch_date
+		, c.mem_nick
+		from tb_freeboard a
+		left
+		outer join tb_attatch b on(a.free_num = b.attatch_place)
+		left outer join tb_member c on(a.writer_id=c.mem_id)
+		where
+		free_num = #{freeNum}
+	</select>
+
+
+	<update id="updateFreeBoard" parameterType="FreeBoardVO">
+		update tb_freeboard
+		set
+		free_title=#{freeTitle}
+		free_content=#{freeContent}
+		writer_id=#{writerId}
+		where free_num = #{freeNum}
+	</update>
+
+	<delete id="deleteFreeBoard" parameterType="String">
+		delete from
+		tb_freeboard
+		where free_num = #{freeNum}
+	</delete>
+
+
+</mapper>
+ 
+     
+    

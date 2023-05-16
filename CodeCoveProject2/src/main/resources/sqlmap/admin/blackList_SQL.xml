@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.admin.BlackListMapper">
+
+	<!-- 신고된 타겟 조회(n회) -->
+	<select id="selectBlackList" parameterType="PaginationInfoVO" resultType="ReportVO">
+	/* kr.or.ddit.mapper.admin.BlackListMapper.selectBlackList */
+        SELECT
+		    C.*
+		FROM    
+			(
+		    SELECT
+		        ROW_NUMBER() OVER(ORDER BY ROWNUM) RNUM
+		        , COUNT(1) OVER() AS TOTAL_CNT
+		        , A.*
+		        , B.COM_CODE_GRP, B.COM_CODE_NM
+		    FROM
+		        (
+		        SELECT 
+		            REP_NUM, MEM_ID, TARGET_ID, REP_DATE, REP_CONTENT
+		        FROM 
+		            TB_REPORT
+				WHERE 
+					TARGET_ID IN (
+						SELECT 
+							TARGET_ID
+						FROM
+							TB_REPORT
+						GROUP BY
+							TARGET_ID
+						HAVING COUNT(*) >= 1 )
+		        ORDER BY
+		            REP_DATE DESC
+		            ) A LEFT OUTER JOIN TB_COM_CODE B ON(A.REP_CONTENT = B.COM_CODE)
+		    WHERE
+		    	1=1
+		    	<if test="searchWord != null and searchWord != ''">
+				AND
+					( INSTR(REP_NUM, #{searchWord}) > 0
+					  OR
+					  INSTR(MEM_ID, #{searchWord}) > 0
+					  OR
+					  INSTR(TARGET_ID, #{searchWord}) > 0
+					  OR
+					  INSTR(REP_CONTENT, #{searchWord}) > 0 )
+		    	</if>
+		    ) C
+		WHERE
+		    C.RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<select id="getTotalReport" resultType="kr.or.ddit.admin.vo.BlackListVO">
+		SELECT
+		    COUNT(*)
+		FROM
+		    TB_REPORT
+		WHERE
+		    TARGET_ID = #{targetId}
+	</select>
+
+
+
+</mapper>

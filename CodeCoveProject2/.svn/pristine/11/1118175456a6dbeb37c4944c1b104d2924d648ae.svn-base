@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.report.ReportMapper">
+
+	<insert id="reportInsert" parameterType="reportVO">
+		INSERT INTO TB_REPORT (
+		REP_NUM,
+		MEM_ID,
+		TARGET_ID,
+		REP_DATE,
+		REP_CONTENT
+		) VALUES (
+		fn_create_num(to_char(sysdate,'yymmdd'), 'TB_REPORT', 'REP_NUM', UPPER('repo')),
+		#{memId},
+		#{targetId},
+		SYSDATE,
+		#{repContent}
+		)
+	</insert>
+
+
+</mapper>

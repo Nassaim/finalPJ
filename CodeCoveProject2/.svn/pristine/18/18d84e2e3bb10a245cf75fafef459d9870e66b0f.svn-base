@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.solutions.ReviewMapper">
+
+
+<!-- 템플릿 리뷰 ajax인서트  -->
+	<insert id="templateReviewInsert" parameterType="TemplateReviewVO">
+	<selectKey order="BEFORE" keyProperty="reviewNum,reviewDate" resultType="TemplateReviewVO">
+		select fn_create_num(to_char(sysdate,'yymmdd'), 'TB_REVIEW', 'REVIEW_NUM', UPPER('rviw')) as reviewNum 
+		,to_char(sysdate, 'yyyy/mm/dd') as reviewDate
+		from dual
+	</selectKey>		
+		insert into TB_REVIEW(
+		REVIEW_NUM, <!-- 리뷰번호 fn자동생성 -->
+		EPROD_NUM, <!-- 상품에서 가져온값 -->
+		REVIEW_CONTENT, <!-- 새로 등록 -->
+		REVIEW_WRITER, <!-- 작성자닉네임-->
+		REVIEW_STAR,
+		REVIEW_DATE<!-- sysdate -->
+		
+		)VALUES (
+		#{reviewNum},
+		#{eprodNum},
+		#{reviewContent},
+		#{reviewWriter},
+		#{reviewStar},
+		#{reviewDate}
+		)
+	</insert>
+	
+	
+<!-- 템플릿리뷰리스트 불러오기 -->
+<select id="templateReviewList" resultType="TemplateReviewVO">
+<!-- 	select  -->
+<!-- 		REVIEW_NUM,  -->
+<!-- 		EPROD_NUM,  -->
+<!-- 		REVIEW_CONTENT,  -->
+<!-- 		REVIEW_STAR,  -->
+<!-- 		REVIEW_WRITER,  -->
+<!-- 		REVIEW_DATE -->
+<!-- 	from TB_REVIEW -->
+<!-- 	where EPROD_NUM = #{eprodNum} -->
+<!-- 	order by REVIEW_NUM desc -->
+SELECT  r.review_num, 
+        r.EPROD_NUM, 
+		r.REVIEW_CONTENT, 
+		r.REVIEW_STAR, 
+		r.REVIEW_WRITER, 
+		r.REVIEW_DATE,
+        m.mem_profile
+FROM TB_REVIEW r
+
+JOIN TB_MEMBER m ON r.REVIEW_WRITER = m.MEM_NICK
+where EPROD_NUM = #{eprodNum}
+order by REVIEW_NUM desc
+	</select>
+	
+<!-- 	템플릿 찜하기 (하트) 인서트 -->
+	<insert id="templateHeartInsert" parameterType="ExpHeartVO">
+		<selectKey order="BEFORE" keyProperty="heartNum" resultType="ExpHeartVO">
+		select fn_create_num(to_char(sysdate,'yymmdd'), 'TB_EXP_HEART', 'HEART_NUM', UPPER('hart')) as heartNum 
+		from dual
+		</selectKey>
+		insert into TB_EXP_HEART(
+		HEART_NUM, 
+		EPROD_NUM, 
+		MEM_ID
+		)values(
+		#{heartNum},
+		#{eprodNum},
+		#{memId} 
+		)
+	</insert>
+	
+<!-- 	템플릿 찜하기 (하트) 딜리트 -->
+	<delete id="templateHeartDelete" parameterType="ExpHeartVO">
+		 delete from TB_EXP_HEART where mem_id =#{memId}  and eprod_num=#{eprodNum}
+	</delete>
+	
+
+<!-- 상품번호와 MEM_ID를 통해 찜하기 여부를 알아내는 쿼리 -->
+	<select id="isHeart" parameterType="ExpHeartVO" resultType="int">
+		SELECT COUNT(*) FROM TB_EXP_HEART WHERE EPROD_NUM = #{eprodNum} AND MEM_ID = #{memId}
+	</select>
+
+<!-- 상품번호와 작성자닉네임을 통해 리뷰작성 여부를 알아내는 쿼리 -->
+	<select id="isReview" parameterType="TemplateReviewVO" resultType="int">
+		SELECT COUNT(*) FROM TB_REVIEW WHERE EPROD_NUM = #{eprodNum} AND REVIEW_WRITER = #{reviewWriter}
+	</select>
+
+<!-- 상품번호를 통해 리뷰가 몇 개인지 세는 쿼리  -->
+	<select id="countReview" parameterType="TemplateReviewVO" resultType="int">
+		SELECT COUNT(*) FROM TB_REVIEW WHERE EPROD_NUM = #{eprodNum}
+	</select>
+	
+
+<!-- template 신고하기 인서트  -->
+	<insert id="reportInsert" parameterType="ReportVO">
+		<selectKey order="BEFORE" keyProperty="repNum" resultType="ReportVO">
+select 
+	fn_create_num(to_char(sysdate,'yymmdd'), 'TB_REPORT', 'REP_NUM', UPPER('erep')) as repNum
+from dual
+
+		</selectKey>	
+	insert into 
+		TB_REPORT( 
+				REP_NUM, 
+				MEM_ID, 
+				TARGET_ID, 
+				REP_DATE, 
+				REP_CONTENT
+		)values(
+				#{repNum},
+				#{memId},
+				#{targetId},
+				SYSDATE,
+				#{repContent} 
+		)
+</insert>
+
+<!-- 상품번호와 MEM_ID를 통해 신고 여부를 알아내는 쿼리 -->
+	<select id="isReport" parameterType="ReportVO" resultType="int">
+		SELECT COUNT(*) FROM TB_REPORT WHERE target_id = #{targetId} AND MEM_ID = #{memId}
+	</select>
+
+
+
+	<!-- 상품 번호를 통해 별점 평균이 몇 점인지 아작스로 화면출력 쿼리 -->
+	<select id="starAvgAjax" parameterType="String" resultType="float">
+	SELECT 
+		ROUND(AVG(REVIEW_STAR), 2)
+			FROM TB_REVIEW
+			WHERE EPROD_NUM = #{eprodNum}
+			GROUP BY EPROD_NUM
+	</select>
+
+
+	<!-- 상품번호를 통해 찜하기가 몇개인지 알아내는 쿼리 -->
+<!-- 	<select id="countReview" parameterType="TemplateReviewVO" resultType="int"> -->
+<!-- 		select count(*) FROM TB_REVIEW where eprod_num=#{eprodNum} -->
+<!-- 	</select> -->
+	
+</mapper>
+
+

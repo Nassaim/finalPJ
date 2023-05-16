@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.project.IColleagueMapper">
+
+	<select id="list" parameterType="String" resultType="ColleagueVO">
+		select
+		    COL_NUM, PJ_ID, c.MEM_ID, COL_DATE, COL_RESIGN_YN, PJ_AUTH_CODE, WORK_ROLE_CODE, COL_PROFILE,
+		    MEM_NAME, MEM_NICK, MEM_MAIL, MEM_PROFILE, MEM_HP
+	    from tb_colleague c, tb_member m
+	    where c.mem_id = m.mem_id
+	    and pj_id = #{pjId}
+	</select>
+
+	<insert id="register" parameterType="ColleagueVO">
+		<selectKey keyProperty="colNum" keyColumn="COL_NUM"
+			order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_COLLEAGUE', 'COL_NUM', UPPER('COLL'))
+			FROM DUAL
+		</selectKey>
+		insert into tb_colleague(
+			COL_NUM, PJ_ID, MEM_ID, COL_DATE, COL_RESIGN_YN, PJ_AUTH_CODE, WORK_ROLE_CODE
+		)values(
+			#{colNum}, #{pjId}, #{memId}, sysdate, #{colResignYn}, #{pjAuthCode}, #{workRoleCode}
+		)
+	</insert>
+	
+	<select id="detailList" parameterType="String" resultType="ColleagueVO">
+		select
+		    wa.COL_NUM, c.MEM_ID, COL_RESIGN_YN, COL_PROFILE,
+		    m.MEM_NAME, m.MEM_NICK, m.MEM_PROFILE
+		from tb_work_assignment wa, tb_colleague c, tb_member m
+		where wa.col_num = c.col_num
+		and c.mem_id = m.mem_id
+		and wa.assignment_del_yn = 'N'
+		and wa.work_num = #{workNum}
+	</select>
+	
+	<delete id="collAllDelete" parameterType="String">
+		delete from tb_colleague
+		where pj_id = #{pjId}
+	</delete>
+	
+	<update id="roleModify" parameterType="ColleagueVO">
+		update tb_colleague
+		set
+			work_role_code = 'WROL05'
+		where work_role_code = 'WROL01'
+		and pj_id = #{pjId}
+	</update>
+
+	<update id="rolePlModify" parameterType="ColleagueVO">
+		update tb_colleague
+		set
+			work_role_code = 'WROL01'
+		where mem_id = #{memId}
+		and pj_id = #{pjId}
+	</update>
+	
+	<update id="selectRoleModify" parameterType="ColleagueVO">
+      update tb_colleague
+      set
+         work_role_code = #{workRoleCode}
+      where col_num = #{colNum}
+   </update>
+   
+   <select id="cooFormList" parameterType="String" resultType="ColleagueVO">
+   		select
+    		m.MEM_ID, m.MEM_NAME, m.MEM_NICK, m.MEM_MAIL, m.MEM_HP,
+    		cf.COO_FORM_NUM, cf.COO_FROM_DATE, cf.COO_NM, cf.COO_FORM_CONTENT
+		from tb_member m, tb_cooboard cb, tb_cooform cf
+		where cb.coo_nm = cf.coo_nm
+		and m.mem_id = cf.applicant_id
+		and cb.pj_id = #{pjId}
+   </select>
+   
+   <delete id="collExit" parameterType="String">
+   		delete from tb_colleague
+   		where col_num = #{colNum}
+   </delete>
+   
+</mapper>

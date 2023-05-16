@@ -1,0 +1,327 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+
+<div class="container-fluid">
+	<div class="card">
+		<div class="row">
+			<div class="row d-flex pt-2">
+				<div class="col d-flex justify-content-center">
+					<form action="/coco/admin/blacklist" method="POST" id="searchForm" class="d-flex">
+						<label for="searchWord" class="col-4 pt-2 col-form-label text-center"><strong>단어검색</strong></label>
+						<div class="col-sm-8 mx-2 my-2">
+							<input type="hidden" name="page" id="page">
+							<input type="text" name="searchWord" id="searchWord" class="form-control text-center" value="${searchWord }">
+						</div>
+					</form>
+				</div>
+				<div class="col-sm-9 d-flex">
+					<div class="d-flex col px-1 mx-1 pt-2">
+						<label for="searchDate" class="col form-label d-inline-block text-center pt-2"><strong>검색기간</strong></label>
+						<div class="col">
+							<input id="searchDate" name="searchDate" class="form-control d-inline-block text-center"> 
+						</div>
+					</div>
+					<form method="POST" action="/coco/admin/blacklist" id="periodForm">
+						<input type="hidden" id="startPeriod" name="startPeriod" value="">
+						<input type="hidden" id="endPeriod" name="endPeriod" value="">
+					</form>
+				</div>
+			</div>
+			<div class="row">
+				<div class="d-flex justify-content-end">
+					<div class="form-check px-2 mx-4 pt-2">
+						<input type="radio" id="today" name="period" class="period form-check-input">
+						<label for="today" class="form-check-label text-center">오늘</label>
+					</div>
+					<div class="form-check px-2 mx-4 pt-2">
+						<input type="radio" id="aDay" name="period"  class="period form-check-input">
+						<label for="aDay" class="form-check-label text-center">1일</label>
+					</div>
+					<div class="form-check px-2 mx-4 pt-2">
+						<input type="radio" id="aWeek" name="period"  class="period form-check-input">
+						<label for="aWeek" class="form-check-label text-center">1주일</label>
+					</div>
+					<div class="form-check px-2 mx-4 pt-2">
+						<input type="radio" id="aMonth" name="period" class="period form-check-input">
+						<label for="aMonth" class="form-check-label text-center">1개월</label>
+					</div>
+					<div class="form-check px-2 mx-4 pt-2">
+						<input type="radio" id="threeMonth" name="period" class="period form-check-input">
+						<label for="threeMonth" class="form-check-label text-center">3개월</label>
+					</div>
+				</div>
+			</div>
+			<div class="row pb-2">
+				<div class="d-flex pt-1 justify-content-end">
+					<div class="col-sm-2 text-center mx-4">
+						<select class="form-select px-3" id="selectCode">
+							<option>코드검색</option>
+							<c:forEach items="${codeList }" var="item">
+								<option value="${item.comCode }">${item.comCode}(${item.comCodeNm })</option>
+							</c:forEach>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th class="text-center">순번</th>
+							<th class="text-center">신고식별코드</th>
+							<th class="text-center">신고자</th>
+							<th class="text-center">신고대상</th>
+							<th class="text-center">신고일시</th>
+							<th class="text-center">신고코드</th>
+						</tr>
+					</thead>
+					<tbody id="tbody">
+						<c:set value="${pagingVO.dataList }" var="report"/>
+						<c:set value="${start }" var="num"/>
+						<c:choose>
+							<c:when test="${empty report }">
+								<tr>
+									<td>조회할 신고가 없습니다.</td>
+								</tr>
+							</c:when>
+							<c:otherwise>
+								<c:forEach items="${report }" var="report">
+									<tr id="trs">
+										<td class="text-center">${num }</td>
+										<td class="text-center">${report.repNum }</td>
+										<td class="text-center">${report.memId }</td>
+										<td class="text-center">${report.targetId }</td>
+										<td class="text-center">
+											<fmt:formatDate value="${report.repDate }" pattern="yyyy-MM-dd / HH:mm:ss"/>
+										</td>
+										<td class="text-center">${report.repContent }</td>
+									</tr>
+									<c:set value="${num - 1 }" var="num"/>
+								</c:forEach>
+							</c:otherwise>
+						</c:choose>
+					</tbody>
+				</table>
+				<div class="row">
+					<div class="card-footer clearfix mt-2" id="pagingArea">
+						${pagingVO.pagingHTML }
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modalForm" tabindex="-1" aria-labelledby="modalFormLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content border-0">
+			<div class="position-relative border-0 pe-4">
+				<button type="button" class="btn btn-gray-200 p-0 border-2 width-3x height-3x rounded-circle flex-center position-absolute end-0 top-0 mt-3 me-3 z-1" data-bs-dismiss="modal" aria-label="Close">
+					<i class="bx bx-x fs-5"></i>
+				</button>
+			</div>
+			<div class="modal-body py-5 px-5 border-0">
+				<div class="position-relative">
+					<form id="expAppfrm" method="post" action="/coco/admin/blockProcess">
+						<h5 class="h5">차단처리</h5>
+						<div class="row d-flex my-1">
+							<label for="refuseDate" class="col-sm-4 col-form-label text-center">신고된 대상</label>
+							<div class="col-sm-8">
+								<input type="text" id="targetId" name="targetId" class="form-control text-center" value="" readonly="readonly">
+							</div>
+						</div>
+						
+						<div class="row d-flex my-1">
+							<label for="refuseDate" class="col-sm-4 col-form-label text-center">대상의 누적신고수</label>
+							<div class="col-sm-8">
+								<input type="text" id="" name="" class="form-control text-center" value="3" readonly="readonly">
+							</div>
+						</div>
+						
+						<div class="row d-flex my-1">
+							<label for="refuseDate" class="col-sm-4 col-form-label text-center">처리일</label>
+							<div class="col-sm-8">
+								<input type="text" id="blackDate" name="blackDate" class="form-control text-center" value="" readonly="readonly">
+							</div>
+						</div>
+						
+						<div class="row d-flex my-1">
+							<label for="expRefuse" class="col-sm-4 col-form-label text-center">처리사유</label>
+							<select class="col-sm-8 form-control">
+								<c:forEach items="${codeList }" var="codeList">
+									<option>${codeList.comCodeNm}</option>
+								</c:forEach>
+							</select>
+						</div>
+						
+						<div class="row d-flex justify-content-end">
+							<div class="col-2">
+								<input type="button" id="cancleBtn" value="취소" class="btn" data-bs-dismiss="modal" aria-label="Close">
+							</div>
+							<div class="col-2">
+								<input type="button" id="refuseBtn" value="차단" class="btn">
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+const pagingArea = $("#pagingArea");
+
+const searchForm = $("#searchForm");
+const periodForm = $("#periodForm");
+const codeForm = $("#codeForm");
+
+const searchDate = $("#searchDate");
+const Ondate = new Date();
+const today = $("#today");
+const aDay = $("#aDay");
+const aWeek = $("#aWeek");
+const aMonth = $("#aMonth");
+const threeMonth = $("#threeMonth");
+const selectCode = $("#selectCode");
+const tbody = $("#tbody");
+const trs = $("#trs");
+const refuseBtn = $("#refuseBtn");
+
+refuseBtn.on("click", function() {
+	Swal.fire({
+        icon: 'success',
+        title: '차단처리 되었습니다.',
+        showConfirmButton: false,
+        timer: 1500
+      });
+});
+
+tbody.on("click", "#trs", function() {
+	$(this).attr('data-bs-toggle', 'modal');
+	$(this).attr('data-bs-target', '#modalForm');
+	$("#modalForm").modal('show');
+	
+	console.log("값 확인 : ", $("#tbody").find("#trs").find("td:eq(3)").text())
+	$("#targetId").val($("#tbody").find("#trs").find("td:eq(3)").text());
+	$("#blackDate").val(formToday());
+});
+
+$(document).ready(function(){
+	selectCode.on("change", function(){
+		codeForm.submit();
+	});
+	
+	
+	$("#searchDate").daterangepicker({
+		locale : {
+			"format":"YYYY-MM-DD",
+			"separator":" ~ ",
+    		"applyLabel": "적용",
+    		"cancelLabel": "취소",
+    		"daysOfWeek": ["일", "월", "화", "수", "목", "금", "토"],
+	        "monthNames": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
+		},
+		showDropdowns: true,
+	    autoApply: true
+	});
+	
+	today.on("checked", function() {
+		set_daterRangePicker(Ondate, Ondate);
+		set_dateVal();
+	});
+
+	aDay.on("click", function() {
+		let aDay = new Date(Ondate);
+		aDay.setDate(Ondate.getDate()-1);
+		set_daterRangePicker(aDay, Ondate)
+		set_dateVal();
+	});
+	
+	aWeek.on("click", function() {
+		let aWeek = new Date(Ondate);
+		aWeek.setDate(Ondate.getDate()-7);
+		set_daterRangePicker(aWeek, Ondate)
+		set_dateVal();
+	});
+	
+	aMonth.on("click", function() {
+		let aMonth = new Date(Ondate);
+		aMonth.setDate(Ondate.getDate()-30);
+		set_daterRangePicker(aMonth, Ondate)
+		set_dateVal();
+	});
+	
+	threeMonth.on("click", function() {
+		let threeMonth = new Date(Ondate);
+		threeMonth.setDate(Ondate.getDate()-90);
+		set_daterRangePicker(threeMonth, Ondate)
+		set_dateVal();
+	});
+	
+});
+
+function set_daterRangePicker(p_arg1, p_arg2) {
+	$("#searchDate").daterangepicker({
+		"locale" : {
+			"format":"YYYY-MM-DD",
+			"separator":" ~ ",
+    		"applyLabel": "적용",
+    		"cancelLabel": "취소",
+			"fromLabel": "From",
+			"toLabel": "To",
+			"customRangeLabel": "Custom",
+			"weekLabel": "W",
+	        "daysOfWeek": ["일", "월", "화", "수", "목", "금", "토"],
+	        "monthNames": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
+		},
+		"startDate": p_arg1,
+	    "endDate": p_arg2,
+	    showDropdowns: true,
+	    autoApply: true
+		}, function (start, end, label) {
+	    	'New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')'	});
+}
+
+function set_dateVal() {
+	let sDate = $("#searchDate").data('daterangepicker').startDate.format('YYYY-MM-DD');
+	let eDate = $("#searchDate").data('daterangepicker').endDate.format('YYYY-MM-DD');
+	
+	$("#searchDate").data('daterangepicker').setStartDate(sDate);
+	$("#searchDate").data('daterangepicker').setEndDate(eDate);
+	
+	$("#startPeriod").val(sDate);
+	$("#endPeriod").val(eDate);
+	
+	periodForm.submit();
+}
+
+function formToday() {
+	var today = new Date();
+
+	var year = today.getFullYear();
+	var month = ('0' + (today.getMonth() + 1)).slice(-2);
+	var day = ('0' + today.getDate()).slice(-2);
+	var hours = ('0' + today.getHours()).slice(-2); 
+	var minutes = ('0' + today.getMinutes()).slice(-2);
+	var seconds = ('0' + today.getSeconds()).slice(-2); 
+
+	var dateString = year + '-' + month  + '-' + day;
+	var timeString = hours + ':' + minutes  + ':' + seconds;
+	
+	return dateString + "/" + timeString;
+}
+
+pagingArea.on("click", "a", function(event){
+	event.preventDefault();
+	var pageNo = $(this).data("page");
+	searchForm.find("#page").val(pageNo);
+	searchForm.submit();
+});
+
+</script>
+

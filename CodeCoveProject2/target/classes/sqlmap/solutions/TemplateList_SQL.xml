@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.solutions.templateListMapper">
+
+	<resultMap type="ExpertProdVO" id="expertProdMap">
+		<id property="eprodNum" column="EPROD_NUM"/>
+		<result property="eprodCateNum" column="EPROD_CATE_NUM"/>
+		<result property="expertId" column="EXPERT_ID"/>
+		<result property="eprodName" column="EPROD_NAME"/>
+		<result property="eprodTag" column="EPROD_TAG"/>
+		<result property="eprodPrice" column="EPROD_PRICE"/>
+		<result property="eprodDate" column="EPROD_DATE"/>
+		<result property="accumNum" column="ACCUM_NUM"/>
+		<result property="eprodLangCode" column="EPROD_LANG_CODE"/>
+		<result property="eprodSummary" column="EPROD_SUMMARY"/>
+		<result property="eprodDel" column="EPROD_DEL"/>
+		<result property="eprodHeart" column="EPROD_HEART"/>
+		<result property="eprodThumbnail" column="EPROD_THUMBNAIL"/>
+		<result property="attatchNum" column="EPROD_GRADE"/>
+		<result property="memNick" column="EPROD_MEMNICK"/>
+		<result property="countReview" column="COUNT_REVIEW"/>
+   		 <result property="starAvg" column="STAR_AVG"/>
+		<collection property="attatchList" resultMap="attatchMap"></collection>
+	</resultMap>
+	
+	<resultMap type="AttatchVO" id="attatchMap">
+	<result property="attatchNum" column="ATTATCH_NUM"/>
+	<result property="attatchOrder" column="ATTATCH_ORDER"/>
+	<result property="attatchPlace" column="ATTATCH_PLACE"/>
+	<result property="filePath" column="FILE_PATH"/>
+	<result property="originNm" column="ORIGIN_NM"/>
+	<result property="saveNm" column="SAVE_NM"/>
+	<result property="attatchType" column="ATTATCH_TYPE"/>
+	<result property="attatchSize" column="ATTATCH_SIZE"/>
+	<result property="downNumber" column="DOWN_COUNT"/>
+	<result property="attatchDate" column="ATTATCH_DATE"/>
+	<result property="uploaderId" column="UPLOADER_ID"/>
+	</resultMap>
+	
+	<select id="selectTemplateCategoryCount" parameterType="PaginationInfoVO" resultType="int">
+		SELECT COUNT(EPROD_NUM)
+		FROM TB_EXP_PROD
+		WHERE 1=1
+		AND EPROD_CATE_NUM = '템플릿'
+		<if test="eprodTag != null">
+			and EPROD_TAG=#{eprodTag}
+		</if>
+	  	<if test="eprodLangCode != null">
+			and EPROD_LANG_CODE=#{eprodLangCode}
+		</if>
+		<if test="searchWord != null and searchWord != ''">
+ 	 		AND LIKE EPROD_NAME '%'||#{searchWord}||'%'
+ 	 	</if>
+	</select>
+
+	<select id="templateCategory" parameterType="PaginationInfoVO" resultMap="expertProdMap">
+		SELECT
+			B.*
+		FROM
+			( SELECT 
+		 			  ROW_NUMBER() OVER(ORDER BY ROWNUM) RNUM
+		 			, COUNT(1) OVER() AS TOTAL_CNT
+		 			, A.*
+		  	  FROM 
+				 	(			
+					 	SELECT
+			            p.EPROD_NUM,
+						p.EPROD_NAME,  
+					    p.EPROD_TAG,
+					    p.EPROD_LANG_CODE,
+					    p.EPROD_PRICE,
+					    p.EPROD_MEMNICK,
+					    COUNT(r.REVIEW_STAR) AS COUNT_REVIEW,
+					    AVG(r.REVIEW_STAR) AS STAR_AVG,
+					    a.SAVE_NM
+					FROM
+					    TB_EXP_PROD p
+					    LEFT JOIN TB_REVIEW r ON p.EPROD_NUM = r.EPROD_NUM
+					    LEFT JOIN TB_ATTATCH a ON p.EPROD_NUM = a.ATTATCH_PLACE AND a.SAVE_NM IS NOT NULL
+					WHERE
+					    p.EPROD_CATE_NUM='템플릿'
+					    and a.attatch_order=1
+						<if test="eprodTag != null">
+							and p.EPROD_TAG=#{eprodTag}
+						</if>
+					  	<if test="eprodLangCode != null">
+							and p.EPROD_LANG_CODE=#{eprodLangCode}
+						</if>
+						<if test="searchWord != null and searchWord != ''">
+				 	 		AND LIKE EPROD_NAME '%'||#{searchWord}||'%'
+				 	 	</if>
+					GROUP BY
+			            p.EPROD_NUM,
+			        	p.EPROD_NAME,  
+					    p.EPROD_TAG,
+					    p.EPROD_LANG_CODE,
+					    p.EPROD_PRICE,
+					    p.EPROD_MEMNICK,
+					    a.SAVE_NM
+					ORDER BY EPROD_NUM DESC
+					) A
+			  	) B
+		WHERE 
+			RNUM BETWEEN #{startRow} AND #{endRow}
+	
+	</select>
+
+
+
+</mapper>

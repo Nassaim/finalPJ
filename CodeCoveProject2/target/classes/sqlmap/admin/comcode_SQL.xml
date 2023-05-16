@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.admin.ComcodeMapper">
+	 
+	 <!-- 페이지네이션 -->
+	 <select id="selectCodeGroupCount" parameterType="PaginationInfoVO" resultType="int">
+	 /* kr.or.ddit.mapper.admin.ComcodeMapper.selectCodeGroupCount */
+	 	SELECT
+	 		COUNT(*)
+	 	FROM 
+	 		TB_COM_CODE_GROUP
+	 	WHERE
+	 		1=1
+	 		<if test="searchWord != null and searchWord != ''">
+	 	AND
+	 		(	INSTR(COM_CODE_GRP, #{searchWord}) > 0
+				OR 
+				INSTR(COM_CODE_GRP_NM, #{searchWord}) > 0 )
+	 		</if>
+	 </select>
+	 
+	 <select id="selectComCodeGroupList" parameterType="PaginationInfoVO" resultType="comCodeVO">
+	 /* kr.or.ddit.mapper.admin.ComcodeMapper.selectComCodeGroupList */
+		SELECT
+			B.*
+		FROM
+		    (
+		    SELECT
+		        ROWNUM RNUM, A.*
+		    FROM
+		        ( 
+		        SELECT 
+				     COM_CODE_GRP
+					,COM_CODE_GRP_NM
+		        FROM 
+					TB_COM_CODE_GROUP
+		        WHERE
+		        	1=1
+		        	<if test="searchWord != null and searchWord != ''">
+		        AND (   INSTR(COM_CODE_GRP, #{searchWord}) > 0
+			            OR 
+			            INSTR(COM_CODE_GRP_NM, #{searchWord}) > 0 )
+		        	</if>
+		        ORDER BY
+		            COM_CODE_GRP
+		            ) A
+		        ) B
+		WHERE 
+			RNUM BETWEEN #{startRow} AND #{endRow}
+	 </select>
+	 
+	 <!-- 공콩코드그룹 리스트 -->
+	 <select id="selectCodeGroupList" resultType="comCodeVO">
+		SELECT 
+			  COM_CODE_GRP
+			, COM_CODE_GRP_NM
+		 FROM
+			TB_COM_CODE_GROUP
+	 </select>
+	 
+	 <select id="selectGrpList" resultType="comCodeVO">
+	 	SELECT
+	 		  COM_CODE_GRP
+	 		, COM_CODE_GRP_NM
+	 	FROM
+	 		TB_COM_CODE_GROUP
+	 </select>
+	 
+	 <!-- 공통코드그룹 추가 -->
+	<insert id="insertComCodeGroup" parameterType="comCodeVO">
+		INSERT INTO 
+			TB_COM_CODE_GROUP (
+				  COM_CODE_GRP
+				, COM_CODE_GRP_NM
+			) VALUES (
+				  UPPER(#{comCodeGrp})
+				, #{comCodeGrpNm}
+			)
+	</insert>
+	 
+	 <!-- 공통코드그룹 1개 -->
+	 <select id="selectComCodeGroup" parameterType="string" resultType="comCodeVO">
+		SELECT
+			  COM_CODE_GRP
+			, COM_CODE_GRP_NM
+		FROM
+			TB_COM_CODE_GROUP
+		WHERE
+			COM_CODE_GRP = UPPER(#{comCodeGrp})
+	</select>
+	
+	<!-- 공통코드그룹 수정 -->
+	<update id="modifyComCodeGroup" parameterType="comCodeVO">
+	 	UPDATE
+	 		TB_COM_CODE_GROUP
+	 	SET
+	 		COM_CODE_GRP = UPPER(#{comCodeGrp}),
+			COM_CODE_GRP_NM = #{comCodeGrpNm}
+		WHERE
+			COM_CODE_GRP = UPPER(#{comCodeGrp})
+	 </update>
+	 
+	 <!-- 공통코드그룹 삭제 -->
+	 <delete id="removeComCodeGroup" parameterType="string">
+	 	DELETE
+	 	FROM
+	 		TB_COM_CODE_GROUP
+	 	WHERE
+	 		COM_CODE_GRP = UPPER(#{comCodeGrp})
+	 </delete>
+	 
+	 <!-- 공통코드 리스트 -->
+	 <select id="selectCodeList" resultType="comCodeVO">
+	 	SELECT 
+			C.COM_CODE, C.COM_CODE_GRP, C.COM_CODE_NM, G.COM_CODE_GRP_NM
+	 	FROM
+			TB_COM_CODE C LEFT OUTER JOIN TB_COM_CODE_GROUP G ON(C.COM_CODE_GRP = G.COM_CODE_GRP)
+	 </select>
+	 
+	 <select id="selectCodeCount" resultType="int" parameterType="PaginationInfoVO">
+	 /* kr.or.ddit.mapper.admin.ComcodeMapper.selectCodeCount */
+	 	SELECT
+	 		COUNT(*)
+	 	FROM 
+	 		TB_COM_CODE C LEFT OUTER JOIN TB_COM_CODE_GROUP G ON(C.COM_CODE_GRP = G.COM_CODE_GRP)
+	 	WHERE
+	 		1=1
+	 		<if test="searchWord != null and searchWord != ''">
+	 	AND
+	 		(	INSTR(C.COM_CODE, #{searchWord}) > 0
+				OR 
+				INSTR(C.COM_CODE_GRP, #{searchWord}) > 0
+				OR 
+				INSTR(C.COM_CODE_NM, #{searchWord}) > 0
+				OR 
+				INSTR(G.COM_CODE_GRP_NM, #{searchWord}) > 0 )
+	 		</if>
+	 </select>
+	 
+	 <select id="selectComCodeList" parameterType="PaginationInfoVO" resultType="comCodeVO">
+	 /* kr.or.ddit.mapper.admin.ComcodeMapper.selectComCodeList */
+	 	SELECT
+		    B.*
+		FROM
+		    (
+		    SELECT
+		        ROWNUM RNUM, A.*
+		    FROM
+		        ( 
+		        SELECT 
+		            C.COM_CODE
+		            , C.COM_CODE_GRP
+		            , C.COM_CODE_NM
+		            , G.COM_CODE_GRP_NM
+		        FROM 
+		            TB_COM_CODE C LEFT OUTER JOIN TB_COM_CODE_GROUP G ON(C.COM_CODE_GRP = G.COM_CODE_GRP)
+		        WHERE
+		        	1=1
+		        	<if test="searchWord != null and searchWord != ''">
+		        AND (
+			            INSTR(C.COM_CODE, #{searchWord}) > 0
+			            OR 
+			            INSTR(C.COM_CODE_GRP, #{searchWord}) > 0
+			            OR 
+			            INSTR(C.COM_CODE_NM, #{searchWord}) > 0
+			            OR 
+			            INSTR(G.COM_CODE_GRP_NM, #{searchWord}) > 0 )
+		        	</if>
+		        ORDER BY
+		            C.COM_CODE         
+		            ) A
+		        ) B
+		WHERE 
+			RNUM BETWEEN #{startRow} AND #{endRow}
+	 </select>
+	 
+	  
+	 <!-- 공통코드 선택(1개) -->
+	<select id="selectCode" parameterType="String" resultType="comCodeVO">
+		SELECT 
+			C.COM_CODE, C.COM_CODE_GRP, C.COM_CODE_NM, G.COM_CODE_GRP_NM
+		FROM
+			TB_COM_CODE C LEFT OUTER JOIN TB_COM_CODE_GROUP G ON(C.COM_CODE_GRP = G.COM_CODE_GRP)
+		WHERE
+			C.COM_CODE = #{comCode}
+	</select>
+
+	<insert id="registerComCode" parameterType="comCodeVO">
+		INSERT INTO
+			TB_COM_CODE (
+				COM_CODE, COM_CODE_GRP, COM_CODE_NM			
+			) VALUES (
+				UPPER(#{comCode}), #{comCodeGrp}, #{comCodeNm}
+			)
+	</insert>	 
+	 
+	 <update id="modifyComCode" parameterType="comCodeVO">
+	 	UPDATE
+	 		TB_COM_CODE
+	 	SET
+	 		COM_CODE_GRP = #{comCodeGrp},  
+	 		COM_CODE_NM = #{comCodeNm}
+	 	WHERE
+	 		COM_CODE = #{comCode}
+	 </update>
+	 
+	 
+	 <delete id="removeComCode" parameterType="string">
+	 	DELETE
+	 	FROM
+	 		TB_COM_CODE
+	 	WHERE
+	 		COM_CODE = UPPER(#{comCode})
+	 </delete>
+	 
+	 <select id="callCodeList" parameterType="string" resultType="comCodeVO">
+	 	SELECT
+        	  A.COM_CODE
+        	, A.COM_CODE_GRP
+        	, A.COM_CODE_NM
+    	FROM
+        	TB_COM_CODE A
+    	WHERE
+        	COM_CODE_GRP = #{comCodeGrp}
+	 </select>
+
+</mapper>

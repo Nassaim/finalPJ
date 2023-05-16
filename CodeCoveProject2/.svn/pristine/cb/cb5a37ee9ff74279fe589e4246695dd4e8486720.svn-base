@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.admin.NoticeMapper">
+
+	<resultMap type="NoticeVO" id="noticeMap">
+		<id property="notiNum" column="NOTI_NUM"/>
+		<result property="pjId" column="PJ_ID"/>
+		<result property="writerId" column="WRITER_ID"/>
+		<result property="notiTitle" column="NOTI_TITLE"/>
+		<result property="notiContent" column="NOTI_CONTENT"/>
+		<result property="viewNum" column="VIEW_NUM"/>
+		<result property="notiClassCode" column="NOTI_CLASS_CODE"/>
+		<result property="notiDelYn" column="NOTI_DEL_YN"/>
+		<result property="notiDate" column="NOTI_DATE"/>
+		<collection property="attatchList" resultMap="attatchMap"></collection>
+		<collection property="codeList" resultMap="codeMap"></collection>
+	</resultMap>
+	
+	<resultMap type="AttatchVO" id="attatchMap">
+		<result property="attatchNum" column="ATTATCH_NUM"/>
+		<result property="attatchOrder" column="ATTATCH_ORDER"/>
+		<result property="attatchPlace" column="ATTATCH_PLACE"/>
+		<result property="filePath" column="FILE_PATH"/>
+		<result property="originNm" column="ORIGIN_NM"/>
+		<result property="saveNm" column="SAVE_NM"/>
+		<result property="attatchType" column="ATTATCH_TYPE"/>
+		<result property="attatchSize" column="ATTATCH_SIZE"/>
+		<result property="downNumber" column="DOWN_COUNT"/>
+		<result property="attatchDate" column="ATTATCH_DATE"/>
+		<result property="uploaderId" column="UPLOADER_ID"/>
+	</resultMap>
+	
+	<resultMap type="comCodeVO" id="codeMap">
+		<id property="comCode" column="COM_CODE"/>
+		<result property="comCodeGrp" column="COM_CODE_GRP"/>
+		<result property="comCodeNm" column="COM_CODE_NM"/>
+	</resultMap>
+
+	<!-- 전체 셀렉트 -->
+	<select id="selectNoticeList" parameterType="PaginationInfoVO" resultType="NoticeVO">
+	/* kr.or.ddit.mapper.admin.NoticeMapper.selectNoticeList */
+		SELECT
+			B.*
+		FROM
+			( SELECT 
+		 			  ROW_NUMBER() OVER(ORDER BY ROWNUM) RNUM
+		 			, COUNT(1) OVER() AS TOTAL_CNT
+		 			, A.*
+		  	  FROM 
+				 	(
+					SELECT
+						NOTI_NUM
+						, PJ_ID
+						, WRITER_ID
+						, NOTI_TITLE
+						, VIEW_NUM
+						, NOTI_CLASS_CODE
+						, NOTI_DATE
+					FROM
+						TB_NOTICE
+					WHERE
+						1=1
+					<if test="searchWord != null and searchWord != ''">
+						AND
+						( INSTR(NOTI_TITLE, #{searchWord}) > 0 )
+					</if>
+					) A
+			  	) B
+		WHERE 
+			RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<!-- 글 1개 조회 -->
+	<select id="readNotice" parameterType="string" resultMap="noticeMap">
+	/* kr.or.ddit.mapper.admin.NoticeMapper.readNotice */
+		SELECT
+			NOTI_NUM
+			, PJ_ID
+			, WRITER_ID
+			, NOTI_TITLE
+			, NOTI_CONTENT
+			, VIEW_NUM
+			, NOTI_CLASS_CODE
+			, NOTI_DEL_YN
+			, NOTI_DATE
+			, TAA.ATTATCH_NUM
+            , TAA.ATTATCH_ORDER
+            , TAA.ATTATCH_PLACE
+            , TAA.FILE_PATH
+            , TAA.ORIGIN_NM
+            , TAA.SAVE_NM
+            , TAA.ATTATCH_TYPE
+            , TAA.ATTATCH_SIZE
+            , TAA.DOWN_COUNT
+            , TAA.ATTATCH_DATE
+            , TAA.UPLOADER_ID
+		FROM
+			TB_NOTICE TN LEFT OUTER JOIN TB_ATTATCH TAA ON (TN.NOTI_NUM = TAA.ATTATCH_PLACE) 
+		WHERE
+			TN.NOTI_NUM = #{notiNum}
+	</select>
+	
+	<!-- 조회수 증가 -->
+	<update id="incrementView" parameterType="string">
+	/* kr.or.ddit.mapper.admin.NoticeMapper.incrementView */
+		UPDATE
+			TB_NOTICE
+		SET
+			VIEW_NUM = VIEW_NUM + 1
+		WHERE
+			NOTI_NUM = #{notiNum}
+	</update>
+	
+	<!-- 시스템공지 -->
+	<insert id="registerNotice" parameterType="NoticeVO">
+	/* kr.or.ddit.mapper.admin.NoticeMapper.registerQnA */
+		INSERT INTO
+    		TB_NOTICE
+	        (
+	            NOTI_NUM
+	            , PJ_ID
+	            , WRITER_ID
+	            , NOTI_TITLE
+	            , NOTI_CONTENT
+	            , VIEW_NUM
+	            , NOTI_DATE
+	        ) VALUES (
+	            fn_create_num(to_char(SYSDATE,'yymmdd'), 'TB_NOTICE', 'NOTI_NUM', UPPER('NOTI'))
+	            , '0'
+	            , #{writerId}
+	            , #{notiTitle}
+	            , #{notiContent}
+	            , 0
+	            , SYSDATE
+	        )
+	</insert>
+
+</mapper>

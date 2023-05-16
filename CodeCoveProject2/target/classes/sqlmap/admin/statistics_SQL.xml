@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.admin.StatisticsMapper">
+
+	<resultMap id="statisticsResultMap" type="StatisticsVO">
+		<result column="chYear" property="chYear"/>
+		<result column="chCate" property="chCate"/>
+		<result column="chPrice" property="chPrice"/>
+	</resultMap>
+
+	<!-- 20, 21, 22, 23년 카테고리별 매출총액 -->
+	<select id="getYearCateData" resultType="StatisticsVO">
+		/* kr.or.ddit.mapper.admin.StatisticsMapper.getYearCateData */
+		SELECT
+		    TO_NUMBER(SUBSTR(A.MY_EPROD,5,2))+2000 AS chYear
+		    , B.EPROD_CATE_NUM AS chCate
+		    , SUM(A.EPROD_PRICE) AS chPrice
+		FROM
+		    TB_MYEXPERT A
+		    , TB_EXP_PROD B
+		WHERE
+		    A.EPROD_NUM = B.EPROD_NUM
+		AND 
+			TO_NUMBER(SUBSTR(A.MY_EPROD,5,2))+2000 BETWEEN '2020' AND '2023'
+		GROUP BY
+		    TO_NUMBER(SUBSTR(A.MY_EPROD,5,2))+2000
+		    , B.EPROD_CATE_NUM
+	</select>
+
+	<select id="getCateData" resultMap="statisticsResultMap">
+	    SELECT
+	        EPROD_CATE_NUM AS chCate
+	        , SUM(A.EPROD_PRICE) AS chPrice
+	    FROM
+	        TB_MYEXPERT A
+	        , TB_EXP_PROD B
+	    WHERE
+	        A.EPROD_NUM = B.EPROD_NUM
+	    GROUP BY
+	        EPROD_CATE_NUM
+	</select>
+	
+	<select id="getCateDataByCategories" resultMap="statisticsResultMap" parameterType="java.util.List">
+	    SELECT
+	        EPROD_CATE_NUM AS chCate
+	        , SUM(A.EPROD_PRICE) AS chPrice
+	    FROM
+	        TB_MYEXPERT A
+	        , TB_EXP_PROD B
+	    WHERE
+	        A.EPROD_NUM = B.EPROD_NUM
+	        AND EPROD_CATE_NUM IN
+	        <foreach collection="list" item="item" separator=",">
+	            #{item}
+	        </foreach>
+	    GROUP BY
+	        EPROD_CATE_NUM
+	</select>
+	
+	
+	<!-- 20 ~ 23년(4년) 카테고리별 매출비중 -->
+	<select id="getCateSumData" resultType="StatisticsVO">
+		/* kr.or.ddit.mapper.admin.StatisticsMapper.getCateSumData */
+		SELECT
+			  TO_NUMBER(SUBSTR(A.MY_EPROD,5,2))+2000 AS chYear	
+		    , SUM(A.EPROD_PRICE) AS CHTOTALPRICE
+		    , EPROD_CATE_NUM AS CHCATE
+		FROM 
+		      TB_MYEXPERT A
+		    , TB_EXP_PROD B
+		WHERE
+		    A.EPROD_NUM = B.EPROD_NUM
+		<if test="selectYear != null and selectYear != ''">
+		AND
+			TO_NUMBER(SUBSTR(A.MY_EPROD,5,2))+2000 = #{selectYear}
+		</if>
+		GROUP BY
+			  TO_NUMBER(SUBSTR(A.MY_EPROD,5,2))+2000 
+		    , EPROD_CATE_NUM
+	</select>
+	
+	
+	
+	<!-- 23년 카테고리별 매출액 -->
+	<select id="getYearSumData" parameterType="StatisticsVO" resultType="StatisticsVO">
+		/* kr.or.ddit.mapper.admin.StatisticsMapper.getYearSumData */
+		SELECT
+		      SUM(A.EPROD_PRICE) AS CHTOTALPRICE
+		    , EPROD_CATE_NUM AS CHCATE
+		FROM 
+		      TB_MYEXPERT A
+		    , TB_EXP_PROD B
+		WHERE
+		    A.EPROD_NUM = B.EPROD_NUM
+        AND
+            SUBSTR(A.MY_EPROD,5,2) = to_char(sysdate, 'YY') 
+        GROUP BY
+		    EPROD_CATE_NUM
+	</select>
+
+</mapper>

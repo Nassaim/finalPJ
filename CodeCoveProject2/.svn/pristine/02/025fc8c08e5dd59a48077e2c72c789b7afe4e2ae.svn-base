@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.solutions.EprodMapper">
+
+	<resultMap type="ExpertProdVO" id="expertProdMap">
+		<id property="eprodNum" column="EPROD_NUM"/>
+		<result property="eprodCateNum" column="EPROD_CATE_NUM"/>
+		<result property="expertId" column="EXPERT_ID"/>
+		<result property="eprodName" column="EPROD_NAME"/>
+		<result property="eprodTag" column="EPROD_TAG"/>
+		<result property="eprodPrice" column="EPROD_PRICE"/>
+		<result property="eprodDate" column="EPROD_DATE"/>
+		<result property="accumNum" column="ACCUM_NUM"/>
+		<result property="eprodLangCode" column="EPROD_LANG_CODE"/>
+		<result property="eprodSummary" column="EPROD_SUMMARY"/>
+		<result property="eprodDel" column="EPROD_DEL"/>
+		<result property="eprodHeart" column="EPROD_HEART"/>
+		<result property="eprodThumbnail" column="EPROD_THUMBNAIL"/>
+		<result property="attatchNum" column="EPROD_GRADE"/>
+		<result property="memNick" column="EPROD_MEMNICK"/>
+		<collection property="attatchList" resultMap="attatchMap"></collection>
+	</resultMap>
+	
+	<resultMap type="AttatchVO" id="attatchMap">
+	<result property="attatchNum" column="ATTATCH_NUM"/>
+	<result property="attatchOrder" column="ATTATCH_ORDER"/>
+	<result property="attatchPlace" column="ATTATCH_PLACE"/>
+	<result property="filePath" column="FILE_PATH"/>
+	<result property="originNm" column="ORIGIN_NM"/>
+	<result property="saveNm" column="SAVE_NM"/>
+	<result property="attatchType" column="ATTATCH_TYPE"/>
+	<result property="attatchSize" column="ATTATCH_SIZE"/>
+	<result property="downNumber" column="DOWN_COUNT"/>
+	<result property="attatchDate" column="ATTATCH_DATE"/>
+	<result property="uploaderId" column="UPLOADER_ID"/>
+	</resultMap>
+
+	<select id="templateDetail" parameterType="String" resultMap="expertProdMap">
+		select
+			t.EPROD_NUM, EPROD_CATE_NUM, EXPERT_ID, EPROD_NAME, EPROD_TAG, EPROD_PRICE, 
+			EPROD_DATE, ACCUM_NUM, EPROD_LANG_CODE, EPROD_SUMMARY, EPROD_DEL,EPROD_HEART,
+			EPROD_THUMBNAIL,EPROD_MEMNICK,
+			ATTATCH_NUM, ATTATCH_ORDER, ATTATCH_PLACE, FILE_PATH, ORIGIN_NM, SAVE_NM, 
+			ATTATCH_TYPE, ATTATCH_SIZE, DOWN_COUNT, ATTATCH_DATE, UPLOADER_ID
+		from TB_EXP_PROD t left outer join TB_ATTATCH A on(t.EPROD_NUM = a.ATTATCH_PLACE)
+		where t.EPROD_NUM = #{eprodNum}
+	</select>
+
+
+	<!-- 상품번호를 통해 결제 여부를 알아내는 쿼리 -->
+	<select id="download" parameterType="String" resultType="int">
+		SELECT COUNT(*) FROM TB_MYEXPERT WHERE EPROD_NUM = #{eprodNum} AND EPRODPAY_YN = 'Y'
+	</select>
+
+	<!-- 상품번호를 통해 찜하기가 몇개인지 알아내는 쿼리 -->
+	<select id="countHeart" parameterType="String" resultType="int">
+		select count(*) from tb_exp_heart where eprod_num=#{eprodNum}
+	</select>
+
+	<!-- 상품 번호를 통해 별점 평균이 몇 점인지 알아내는 쿼리 -->
+	<select id="starAvg" parameterType="String" resultType="float">
+	SELECT 
+		ROUND(AVG(REVIEW_STAR), 2)
+			FROM TB_REVIEW
+			WHERE EPROD_NUM = #{eprodNum}
+			GROUP BY EPROD_NUM
+	</select>
+	
+	
+	<!-- 상품번호를 통해 찜하기가 몇개인지 알아내는 쿼리 -->
+	<select id="countReview" parameterType="String" resultType="int">
+		select count(*) FROM TB_REVIEW where eprod_num=#{eprodNum}
+	</select>
+
+
+
+<!-- 템플릿 판매 상품 등록 -->
+	<insert id="templateInsert" parameterType="ExpertProdVO">
+		insert into TB_EXP_PROD(
+		EPROD_NUM, <!-- 상품번호 -->
+		EXPERT_ID,	<!-- 멘토아이디 -->
+		EPROD_CATE_NUM, <!-- 카테고리번호 -->
+		EPROD_NAME, <!-- 상품명 -->
+		EPROD_PRICE, <!-- 상품가격 -->
+		EPROD_TAG, <!-- 상품카테고리 -->
+		EPROD_LANG_CODE,<!-- 상품태그 -->
+		EPROD_SUMMARY,<!-- 상품설명 -->
+		EPROD_DATE, <!-- 상품날짜 -->
+		EPROD_MEMNICK<!-- 멤버닉네임 -->
+		)VALUES (
+		fn_create_num(to_char(sysdate,'yymmdd'), 'TB_EXP_PROD', 'EPROD_NUM', UPPER('slpo'))
+		, #{expertId}
+		, #{eprodCateNum}
+		, #{eprodName}
+		, #{eprodPrice}
+		, #{eprodTag}
+		, #{eprodLangCode}
+		, #{eprodSummary}
+		,SYSDATE
+		,#{memNick}
+		)
+
+	</insert>
+
+<!-- 구매내역 인서트 -->
+	<insert id="buyInsert" parameterType="MyExpertVO" >
+		<selectKey order="AFTER" keyProperty="myEprod" resultType="MyExpertVO">
+			select my_eprod from tb_myexpert where my_eprod = (select max(my_eprod) from tb_myexpert)
+		</selectKey>	
+		insert into TB_MYEXPERT(
+			MY_EPROD, 
+			EPROD_NUM, 
+			BUYER_ID, 
+			PROGRESS_CODE, 
+			EPROD_NAME, 
+			EPROD_SUMMARY, 
+			EPROD_PRICE, 
+			EPROD_GRADE
+		)VALUES (
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_MYEXPERT', 'MY_EPROD', UPPER('prod')),
+			#{eprodNum},
+			#{buyerId},
+			#{progressCode},
+			#{eprodName},
+			#{eprodSummary},
+			#{eprodPrice},
+			#{eprodGrade}
+		)
+
+	</insert>
+
+<!-- 구매내역업데이트 -->
+	<update id="buyUpdate" parameterType="String">
+		UPDATE 
+			TB_MYEXPERT
+		SET
+			EPRODPAY_YN = 'Y'
+		WHERE
+			MY_EPROD = #{myEprod}
+	</update>
+
+<!-- 결제 성공 인서트 -->
+ 	<insert id="paySuccessInsert" parameterType="MyExpertVO"> 
+ 	<selectKey order="BEFORE" keyProperty="epayNum" resultType="MyExpertVO">
+		select fn_create_num(to_char(sysdate,'yymmdd'), 'TB_EPROD_PAYMENT', 'EPAY_NUM', UPPER('paym')) as epayNum from dual
+	</selectKey>	
+ 	insert into TB_EPROD_PAYMENT( 
+ 		EPAY_NUM,  
+ 		MY_EPROD,  
+ 		AMOUNT,  
+ 		EPAY_DATE,  
+ 		EPAY_YN 
+ 	)values(
+		#{epayNum},
+		#{myEprod},
+ 		#{eprodPrice},
+ 		SYSDATE,
+ 		'Y'
+ 	)
+ 	</insert>
+
+
+<!-- 	템플릿 영수증 출력 셀렉트문 -->
+
+	<resultMap id="receipt" type="MyExpertVO">
+	  <id property="epayNum" column="EPAY_NUM" />
+	  <result property="myEprod" column="MY_EPROD" />
+	  <result property="eprodName" column="EPROD_NAME" />
+	  <result property="amount" column="AMOUNT" />
+	  <result property="epayDate" column="EPAY_DATE" />
+	</resultMap>
+	
+	<select id="paySelect" resultMap="receipt">
+	  <![CDATA[
+	    SELECT e.EPAY_NUM, m.EPROD_NUM, m.EPROD_NAME, e.AMOUNT, e.EPAY_DATE
+	    FROM TB_MYEXPERT m
+	    LEFT OUTER JOIN TB_EPROD_PAYMENT e
+	    ON m.MY_EPROD = e.MY_EPROD
+	    WHERE EPAY_NUM = #{epayNum}
+	  ]]>
+	</select>
+
+
+
+<!-- 템플릿 멘토소개 셀렉트문 -->
+	<select id="mentoProfile" parameterType="String" resultType="MentoProfileVO">
+	
+		SELECT a.EXPERT_ID, 
+		       a.PRESENTATION, 
+		       a.ASSUME,  
+		       a.EXP_JOB_MAJOR, 
+		       a.EXP_JOB_LEVEL, 
+		       a.EXP_JOB_CURRENT, 
+		       b.MEM_NAME, 
+		       b.MEM_NICK, 
+		       b.MEM_MAIL, 
+		       b.MEM_PROFILE
+		FROM TB_EXPERT a
+		INNER JOIN TB_MEMBER b
+		ON a.EXPERT_ID = b.MEM_ID
+		where a.EXPERT_ID=#{expertId}
+	
+	</select>
+
+
+
+
+
+
+
+
+
+</mapper>

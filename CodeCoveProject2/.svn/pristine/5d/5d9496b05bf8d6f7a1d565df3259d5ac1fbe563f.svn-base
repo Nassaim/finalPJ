@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.blog.BlogListMapper">
+
+<sql id="listFrag">
+	WHERE POST_DEL_YN='N'
+	AND POST_PUBLIC_YN = 'Y'
+</sql>
+
+<select id="latestBlogRecord" resultType="int">
+	SELECT COUNT(*)
+	FROM TB_BLOG_POST
+	<include refid="listFrag" />
+</select>
+<select id="latestBlogList" resultType="MyBlogPostVO" parameterType="PaginationInfoVO">
+	SELECT B.*
+	FROM (SELECT ROWNUM RNUM, A.*
+	        FROM(SELECT POST_NUM,
+				        POST_CATE_NUM,
+				        BLOGGER_ID,
+                        CASE WHEN LENGTH(POST_TITLE) <![CDATA[<=]]> '10' THEN POST_TITLE
+                        WHEN LENGTH(POST_TITLE) <![CDATA[>]]> '10' THEN SUBSTR(POST_TITLE, 0,10)||' ...'
+                        END AS POST_TITLE,
+				        POST_CONTENT,
+				        POST_VIEW,
+				        POST_HEART,
+				        TO_CHAR(POST_DATE,'YYYY.mm.dd  HH24:MI') AS POST_DATE,
+				        POST_TAG,
+				        THUMBNAIL
+				 FROM TB_BLOG_POST
+				 <include refid="listFrag" />
+				 ORDER BY POST_DATE DESC
+	            ) A    
+	        ) B
+	WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+</select>
+
+<select id="trendBlogList" resultType="MyBlogPostVO">
+	SELECT POST_NUM,
+	       POST_CATE_NUM,
+	       BLOGGER_ID,
+           CASE WHEN LENGTH(POST_TITLE)  <![CDATA[<=]]>  '10' THEN POST_TITLE
+           WHEN LENGTH(POST_TITLE)  <![CDATA[>]]>  '10' THEN SUBSTR(POST_TITLE, 0,10)||' ...'
+           END AS POST_TITLE,
+	       POST_CONTENT,
+	       POST_VIEW,
+	       POST_HEART,
+	       TO_CHAR(POST_DATE,'YYYY.mm.dd  HH24:MI') AS POST_DATE,
+	       POST_TAG,
+	       THUMBNAIL
+	FROM TB_BLOG_POST
+	<include refid="listFrag" />
+    AND POST_DATE BETWEEN SYSDATE-10 AND SYSDATE
+    AND ROWNUM <![CDATA[<=]]> 12
+	ORDER BY POST_VIEW DESC, POST_HEART DESC
+</select>
+
+<select id="searchBlogRecord" resultType="int" parameterType="PaginationInfoVO">
+	SELECT COUNT(*)
+	FROM TB_BLOG_POST
+	<include refid="listFrag" />
+	AND (
+			INSTR(POST_TITLE, #{searchWord}) > 0
+			OR 
+			INSTR(POST_CONTENT, #{searchWord}) > 0
+			OR 
+			INSTR(POST_TAG, #{searchWord}) > 0
+			OR 
+			INSTR(BLOGGER_ID, #{searchWord}) > 0
+		)
+	ORDER BY POST_DATE DESC
+</select>
+<select id="searchBlogList" resultType="MyBlogPostVO" parameterType="PaginationInfoVO">
+	SELECT B.*
+	FROM (SELECT ROWNUM RNUM, A.*
+	        FROM(SELECT POST_NUM,
+				        POST_CATE_NUM,
+				        BLOGGER_ID,
+                        CASE WHEN LENGTH(POST_TITLE) <![CDATA[<=]]> '10' THEN POST_TITLE
+                        WHEN LENGTH(POST_TITLE) <![CDATA[>]]> '10' THEN SUBSTR(POST_TITLE, 0,10)||' ...'
+                        END AS POST_TITLE,
+				        POST_CONTENT,
+				        POST_VIEW,
+				        POST_HEART,
+				        TO_CHAR(POST_DATE,'YYYY.mm.dd  HH24:MI') AS POST_DATE,
+				        POST_TAG,
+				        THUMBNAIL
+				 FROM TB_BLOG_POST
+				 <include refid="listFrag" />
+				 AND (
+				 		INSTR(POST_TITLE, #{searchWord}) > 0
+				        OR 
+				        INSTR(POST_CONTENT, #{searchWord}) > 0
+				        OR 
+				        INSTR(POST_TAG, #{searchWord}) > 0
+				        OR 
+				        INSTR(BLOGGER_ID, #{searchWord}) > 0
+				     )
+				 ORDER BY POST_DATE DESC
+	            ) A    
+	        ) B
+	WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+</select>
+</mapper>

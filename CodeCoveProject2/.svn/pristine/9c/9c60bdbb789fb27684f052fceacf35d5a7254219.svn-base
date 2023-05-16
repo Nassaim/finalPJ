@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.member.MyChartMapper">
+
+<select id="selectYearProfie" resultType="MyChartVO">
+	select extract(month from to_date(substr(a.my_eprod, 5, 6), 'YY-MM-DD')) as chMonth, sum(a.eprod_price) as chMonthSum
+	from tb_myexpert a, tb_exp_prod b
+	where a.eprod_num = b.eprod_num
+	and b.expert_id = #{expertId}
+	and substr(a.my_eprod, 5, 2) = #{chYear}
+	group by extract(month from to_date(substr(a.my_eprod, 5, 6), 'YY-MM-DD'))
+</select>
+
+
+<select id="selectCategoryProfit" resultType="MyChartVO">
+	select extract(month from to_date(substr(a.my_eprod, 5, 6), 'YY-MM-DD')) as chMonth, b.eprod_cate_num as chProdCate, sum(a.eprod_price) as chMonthSum
+	from tb_myexpert a, tb_exp_prod b
+	where a.eprod_num = b.eprod_num
+	and b.expert_id = #{expertId}
+	and substr(a.my_eprod, 5, 2) = #{chYear}
+	and b.eprod_cate_num = #{chCateName}
+	group by extract(month from to_date(substr(a.my_eprod, 5, 6), 'YY-MM-DD')), b.eprod_cate_num	
+</select>
+
+
+<select id="totalSellList" resultType="MyExpertVO">
+
+    select A.EPAY_NUM, B.eprod_name, A.epay_date, A.amount, B.PROGRESS_CODE, C.eprod_cate_num, b.eprod_num
+    from tb_eprod_payment A
+    inner join tb_myexpert B
+    on (B.MY_EPROD = A.MY_EPROD and A.EPAY_YN ='Y' and B.EPRODPAY_YN ='Y')
+    inner join tb_exp_prod C
+    on (C.eprod_num = B.eprod_num)
+    where c.expert_id = #{expertId}
+    order by a.epay_date desc
+    
+</select>
+
+
+<select id="selectTopResult" resultType="MyExpertVO">
+    select extract(month from A.epay_date) as totalMonth, sum(A.amount) as totalSum
+    from tb_eprod_payment A
+    inner join tb_myexpert B
+    on (B.MY_EPROD = A.MY_EPROD and A.EPAY_YN ='Y' and B.EPRODPAY_YN ='Y')
+    inner join tb_exp_prod C
+    on (C.eprod_num = B.eprod_num)
+    where c.expert_id = #{expertId}
+    and extract(year from A.epay_date) = extract(year from current_date)
+    group by extract(month from A.epay_date) 
+    having extract(month from A.epay_date) = extract(month from current_date)
+</select>
+
+<select id="selectLastTopResult" resultType="MyExpertVO">
+    select extract(month from A.epay_date) as totalMonth, sum(A.amount) as totalSum
+    from tb_eprod_payment A
+    inner join tb_myexpert B
+    on (B.MY_EPROD = A.MY_EPROD and A.EPAY_YN ='Y' and B.EPRODPAY_YN ='Y')
+    inner join tb_exp_prod C
+    on (C.eprod_num = B.eprod_num)
+    where c.expert_id = #{expertId}
+    and extract(year from A.epay_date) = extract(year from current_date)
+    group by extract(month from A.epay_date) 
+    having extract(month from A.epay_date) = extract(month from ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1))
+</select>
+
+<select id="selectTopLike" resultType="MyExpertVO">
+   	select c.eprod_name, c.like_count, c.eprod_num, c.EPROD_CATE_NUM
+	from (select a.eprod_name, count(b.heart_num) as like_count, a.eprod_num, a.EPROD_CATE_NUM
+	        from tb_exp_prod a
+	        inner join tb_exp_heart b
+	        on (a.eprod_num = b.eprod_num)
+	        where a.expert_id = #{expertId}
+	        group by a.eprod_name, a.eprod_num, a.EPROD_CATE_NUM
+	        order by count(b.heart_num) desc) c
+	<![CDATA[ WHERE ROWNUM <= 1 ]]>
+</select>
+
+<select id="selectTopReview" resultType="MyExpertVO">
+    select c.eprod_name, c.review_count, c.eprod_num, c.eprod_cate_num
+	from (select  a.eprod_name, count(b.review_num) as review_count, b.eprod_num, a.eprod_cate_num
+	        from tb_exp_prod a
+	        inner join tb_review b
+	        on (a.eprod_num = b.eprod_num)
+	        where a.expert_id = #{expertId}
+	        group by a.eprod_name, b.eprod_num, a.eprod_cate_num
+	        order by count(b.review_num) desc) c
+	<![CDATA[ WHERE ROWNUM <= 1 ]]>
+</select>
+
+
+</mapper>

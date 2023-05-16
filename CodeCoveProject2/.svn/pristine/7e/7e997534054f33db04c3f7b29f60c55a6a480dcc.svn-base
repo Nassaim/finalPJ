@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.admin.MemberManagementMapper">
+
+	<!-- 멤버조회 - 리스트 -->
+	<select id="selectAllMemberList" parameterType="PaginationInfoVO" resultType="MemberVO">
+		/* kr.or.ddit.mapper.admin.MemberManagementMapper.selectAllMemberList */
+		SELECT
+		    B.*
+		FROM
+    		(
+    		SELECT
+        		  ROW_NUMBER() OVER(ORDER BY ROWNUM) RNUM
+        		, COUNT(1) OVER() AS TOTAL_CNT
+        		, A.*
+    		FROM
+		       ( 
+				SELECT
+					  MEM_ID
+					, MEM_PASS
+					, MEM_NAME
+					, MEM_NICK
+					, MEM_MAIL
+					, MEM_HP
+					, REPORT
+					, MEM_PROFILE
+					, MEMEXP_YN
+				FROM
+					TB_MEMBER
+				WHERE
+					1=1
+				<if test="searchWord != null and searchWord != ''">
+					AND 
+					( 
+			            INSTR(MEM_ID, #{searchWord}) > 0
+			            OR
+			            INSTR(MEM_NAME, #{searchWord}) > 0
+			            OR
+			            INSTR(MEM_NICK, #{searchWord}) > 0
+			            OR
+			            INSTR(MEM_MAIL, #{searchWord}) > 0
+			            OR
+			            INSTR(MEM_HP, #{searchWord}) > 0)
+				</if>
+		            ) A
+    			) B
+		WHERE
+    		RNUM BETWEEN #{startRow} and #{endRow}
+	</select>
+
+</mapper>

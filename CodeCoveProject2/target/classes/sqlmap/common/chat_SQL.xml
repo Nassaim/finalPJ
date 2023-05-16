@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.chat.ChatMapper">
+
+<!-- 	<insert id="register" parameterType="String"> -->
+<!-- 		insert into chatfile( -->
+<!-- 			fullname, room_id, regdate -->
+<!-- 		) values ( -->
+<!-- 			#{fullName}, seq_chat.nextval, sysdate -->
+<!-- 		) -->
+<!-- 	</insert> -->
+	
+	<select id="roomCheck" parameterType="String" resultType="ChatVO">
+	   select cr_num, cr_create_date, cr_id
+	   from tb_chatroom
+	   where cr_id = #{epayNum}
+	</select>
+	
+	<insert id="roomCreate" parameterType="String">
+	   insert into TB_CHATROOM(
+       	 CR_NUM, CR_CREATE_DATE, CR_ID
+     	 )VALUES (
+         fn_create_num(to_char(sysdate,'yymmdd'), 'TB_CHATROOM', 'CR_NUM', UPPER('CHAT'))
+         , SYSDATE
+         , #{epayNum}
+          )
+	</insert>
+	
+	<insert id="chatMsgInsert" parameterType="ChatVO">
+	   insert into TB_CHAT (
+         CR_CONTENT_NUM, CR_NUM, CR_CONTENT, CR_DATE, MEM_ID
+	   ) values (
+	        fn_create_num(to_char(sysdate,'yymmdd'), 'TB_CHAT', 'CR_CONTENT_NUM', UPPER('CHRO'))
+	        , #{crNum}
+	        , #{crContent}
+	        , SYSDATE
+	        , #{memId}
+	   )
+	</insert>
+	
+	<insert id="fileInsert" parameterType="ChatVO">
+	   insert into TB_CHAT (
+         CR_CONTENT_NUM, CR_NUM, CR_DATE, CR_FILE, MEM_ID
+	   ) values (
+	        fn_create_num(to_char(sysdate,'yymmdd'), 'TB_CHAT', 'CR_CONTENT_NUM', UPPER('CHRO'))
+	        , #{crNum}
+	        , SYSDATE
+	        , #{crFile}
+	        , #{memId}
+	   )
+	</insert>
+	
+	<select id="selectChatlog" parameterType="String" resultType="ChatVO">
+        select 
+   			 a.CR_CONTENT_NUM, a.CR_NUM, a.CR_CONTENT, a.CR_DATE, a.CR_FILE, a.MEM_ID, b.MEM_NICK
+		from tb_chat a, tb_member b
+    	where a.mem_id = b.mem_id 
+        and a.cr_num = #{crNum}
+    	order by a.CR_CONTENT_NUM asc
+	</select>
+	
+<!-- 	<select id="selectChatlog" parameterType="String" resultType="ChatVO"> -->
+<!-- 		select  -->
+<!--    			 CR_CONTENT_NUM, CR_NUM, CR_CONTENT, CR_DATE, CR_FILE, MEM_ID -->
+<!-- 		from tb_chat -->
+<!--     	where cr_num = #{crNum} -->
+<!--     	order by CR_CONTENT_NUM asc -->
+<!-- 	</select> -->
+	
+	
+	<select id="selectNickName" parameterType="String" resultType="String">
+		select e.mem_nick
+		from tb_member e
+		where e.mem_id = (
+		        select d.expert_id 
+		        from tb_exp_prod d
+		        where
+		        d.eprod_num = 
+		        (select c.eprod_num 
+		        from tb_myexpert c
+		        where c.my_eprod = (
+		            (select a.my_eprod
+		            from tb_eprod_payment a
+		            where a.epay_num = (select b.cr_id
+		                                from tb_chatroom b
+		                                where b.cr_num = #{crNum})))))
+	</select>
+	
+	
+	<insert id="roomCreatePj" parameterType="String">
+	   insert into TB_CHATROOM(
+       	 CR_NUM, CR_CREATE_DATE, CR_ID
+     	 )VALUES (
+         fn_create_num(to_char(sysdate,'yymmdd'), 'TB_CHATROOM', 'CR_NUM', UPPER('CHAT'))
+         , SYSDATE
+         , #{pjId}
+          )
+	</insert>
+	
+	
+	<select id="selectChatRoomList" parameterType="String" resultType="ChatVO">
+<!-- 		select a.pj_id, a.pj_name, c.cr_num, a.pj_create_date, d.com_code_nm, e.mem_nick -->
+<!-- 		from tb_project a, tb_colleague b, tb_chatroom c, tb_com_code d, tb_member e -->
+<!-- 		where b.MEM_ID = e.MEM_ID -->
+<!--         and a.pj_id = b.pj_id -->
+<!-- 		and b.pj_id = c.cr_id -->
+<!-- 		and a.pj_status_code = d.COM_CODE -->
+<!-- 		and b.mem_id=#{memId} -->
+
+		 	select a.pj_id, a.pj_name, c.cr_num, a.pj_create_date, d.com_code_nm
+				from tb_project a, tb_colleague b, tb_chatroom c, tb_com_code d
+				where a.pj_id = b.pj_id
+				and b.pj_id = c.cr_id
+				and a.pj_status_code = d.COM_CODE
+				and b.mem_id=#{memId}
+				order by a.pj_create_date desc
+	</select>
+	
+	<insert id="alarmMsgInsert" parameterType="AlarmVO">
+      insert into TB_NEWS (
+         NEWS_NUM, RECEIVER_ID, NEWS_MSG_CODE , NEWS_DATE, NEWS_TARGET_ID
+	   ) values (
+	        fn_create_num(to_char(sysdate,'yymmdd'), 'TB_NEWS', 'NEWS_NUM', UPPER('NEWS'))
+	        , #{receiverId}
+	        , #{newsMsgCode}
+	        , SYSDATE
+	        , #{newsTargetId}
+	   )
+	</insert>
+	
+	<select id="selectAlarmLogs" parameterType="String" resultType="AlarmVO">
+		select NEWS_NUM, RECEIVER_ID, NEWS_MSG_CODE, NEWS_OPEN_YN, NEWS_DATE, NEWS_TARGET_ID
+		from tb_news
+		where receiver_id = #{receiverId}
+		order by NEWS_DATE desc
+	</select>
+	
+	
+	<update id="alarmChkModify" parameterType="String">
+		update tb_news
+		set NEWS_OPEN_YN = 'Y'
+		where NEWS_NUM = #{newsNum}
+	</update>
+	
+	
+	
+	
+</mapper>

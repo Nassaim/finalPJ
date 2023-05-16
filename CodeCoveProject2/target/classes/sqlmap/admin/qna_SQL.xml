@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.admin.QnAMapper">
+	 
+	 <resultMap type="QnAVO" id="qnaMap">
+	 	<id property="qnaNum" column="QNA_NUM"/>
+	 	<result property="writerId" column="WRITER_ID"/>
+	 	<result property="qnaTitle" column="QNA_TITLE"/>
+	 	<result property="qnaContent" column="QNA_CONTENT"/>
+	 	<result property="qnaPass" column="QNA_PASS"/>
+	 	<result property="qnaPublicYn" column="QNA_PUBLIC_YN"/>
+	 	<result property="answerTitle" column="ANSWER_TITLE"/>
+	 	<result property="answerContent" column="ANSWER_CONTENT"/>
+	 	<result property="viewNum" column="VIEW_NUM"/>
+	 	<result property="answerId" column="ANSWER_ID"/>
+	 	<result property="delYn" column="DEL_YN"/>
+	 	<result property="qnaDate" column="QNA_DATE"/>
+	 	<result property="answerDate" column="ANSWER_DATE"/>
+	 	<collection property="attatchList" resultMap="attatchMap"></collection>
+	 	<collection property="codeList" resultMap="codeMap"></collection>
+		<collection property="memList" resultMap="memberMap"></collection>
+	 </resultMap>
+	 
+	<resultMap type="AttatchVO" id="attatchMap">
+		<result property="attatchNum" column="ATTATCH_NUM"/>
+		<result property="attatchOrder" column="ATTATCH_ORDER"/>
+		<result property="attatchPlace" column="ATTATCH_PLACE"/>
+		<result property="filePath" column="FILE_PATH"/>
+		<result property="originNm" column="ORIGIN_NM"/>
+		<result property="saveNm" column="SAVE_NM"/>
+		<result property="attatchType" column="ATTATCH_TYPE"/>
+		<result property="attatchSize" column="ATTATCH_SIZE"/>
+		<result property="downNumber" column="DOWN_COUNT"/>
+		<result property="attatchDate" column="ATTATCH_DATE"/>
+		<result property="uploaderId" column="UPLOADER_ID"/>
+	</resultMap>
+	
+	<resultMap type="comCodeVO" id="codeMap">
+		<id property="comCode" column="COM_CODE"/>
+		<result property="comCodeGrp" column="COM_CODE_GRP"/>
+		<result property="comCodeNm" column="COM_CODE_NM"/>
+	</resultMap>
+	
+	<resultMap type="MemberVO" id="memberMap">
+		<id property="memId" column="MEM_ID"/>
+		<result property="memPass" column="MEM_PASS"/>
+		<result property="memName" column="MEM_NAME"/>
+		<result property="memNick" column="MEM_NICK"/>
+		<result property="memMail" column="MEM_MAIL"/>
+		<result property="memHP" column="MEM_HP"/>
+		<result property="report" column="REPORT"/>
+		<result property="memexpYn" column="MEM_PROFILE"/>
+		<result property="memProfile" column="MEMEXP_YN"/>
+	</resultMap>
+	 
+	 
+	 <!-- QnA 게시판 게시물 등록 -->
+	 <insert id="registerQnA" parameterType="qnaVO">
+	 	/* kr.or.ddit.mapper.admin.QnAMapper.registerQnA */
+	 	INSERT INTO
+	 		TB_QNA
+	 			(	  QNA_NUM
+	 				, WRITER_ID
+	 				, QNA_TITLE
+	 				, QNA_CONTENT
+	 				, QNA_PASS
+	 				, QNA_PUBLIC_YN
+	 				, VIEW_NUM
+	 				, QNA_DATE
+	 			) VALUES (
+	 				  fn_create_num(to_char(SYSDATE,'yymmdd'), 'TB_QNA', 'QNA_NUM', UPPER('QNAA'))
+	 				, #{writerId}
+	 				, #{qnaTitle}
+	 				, #{qnaContent}
+	 				, #{qnaPass}
+	 				, #{qnaPublicYn}
+	 				, 0
+	 				, SYSDATE
+	 			)
+	 </insert>
+	 
+	 <!-- QnA 게시판 게시물 수 조회 -->
+	 <select id="countQnAList" parameterType="PaginationInfoVO" resultType="int">
+	 	SELECT
+	 		COUNT(*)
+	 	FROM
+	 		TB_QNA A
+	 	WHERE
+	 		1=1
+	 		<if test="searchWord != null and searchWord != ''">
+	 	AND
+	 		(	INSTR(A.WRITER_ID, #{searchWord}) > 0
+				OR
+	 			INSTR(A.QNA_TITLE, #{searchWord}) > 0
+				OR
+	 			INSTR(A.ANSWER_TITLE, #{searchWord}) > 0
+	 			OR
+				INSTR(A.QNA_NUM, #{searchWord}) > 0	)
+	 		</if>
+	 </select>
+	 
+	 <!-- QnA 게시판 게시판 리스트 조회 -->
+	 <select id="selectQnABoardList" parameterType="PaginationInfoVO" resultType="qnaVO">
+		/* kr.or.ddit.mapper.admin.QnAMapper.selectQnABoardList */
+		SELECT
+			B.*
+		FROM
+			( SELECT 
+		 			A.*, ROW_NUMBER() OVER(ORDER BY ROWNUM) RNUM
+		  	  FROM 
+				 	( SELECT
+					 	  A.QNA_NUM
+					 	, A.WRITER_ID
+					 	, A.QNA_TITLE
+					 	, A.QNA_PASS
+					 	, A.QNA_DATE 
+					 	, A.VIEW_NUM
+					 	, A.QNA_PUBLIC_YN
+					 	, A.ANSWER_TITLE
+					 	, A.ANSWER_ID
+					 	, A.ANSWER_DATE 
+					 FROM
+				 		TB_QNA A
+				 	 WHERE
+				 	 	1=1
+				 	 <if test="searchWord != null and searchWord != ''">
+				 	 AND (	INSTR(A.WRITER_ID, #{searchWord}) > 0
+							OR
+				 			INSTR(A.QNA_TITLE, #{searchWord}) > 0
+							OR
+				 			INSTR(A.ANSWER_TITLE, #{searchWord}) > 0	
+				 			OR
+				 			INSTR(A.QNA_NUM, #{searchWord}) > 0 )
+				 	 </if>
+					 ORDER BY
+			            A.QNA_DATE DESC
+			            ) A
+			  	) B
+		WHERE 
+			RNUM BETWEEN #{startRow} AND #{endRow}
+	 </select>
+	 
+	 <!-- QnA 게시판 게시물 읽기 -->
+	 <select id="readQnA" parameterType="string" resultMap="qnaMap">
+	 /* kr.or.ddit.mapper.admin.QnAMapper.readQnA */
+	 	SELECT
+	          TQA.QNA_NUM
+	        , TQA.WRITER_ID
+		 	, TQA.QNA_TITLE
+		 	, TQA.QNA_CONTENT
+		 	, TQA.QNA_DATE
+		 	, TQA.VIEW_NUM
+		 	, TQA.ANSWER_TITLE
+	 		, TQA.ANSWER_CONTENT
+	 		, TQA.ANSWER_ID
+	 		, TQA.DEL_YN
+	 		, TQA.ANSWER_DATE
+	        , TQA.ATTATCH_NUM
+	        , TQA.ATTATCH_ORDER
+	        , TQA.ATTATCH_PLACE
+	        , TQA.FILE_PATH
+	        , TQA.ORIGIN_NM
+	        , TQA.SAVE_NM
+	        , TQA.ATTATCH_TYPE
+	        , TQA.ATTATCH_SIZE
+	        , TQA.DOWN_COUNT
+	        , TQA.ATTATCH_DATE
+	        , TQA.UPLOADER_ID
+	        , TM.MEM_NAME
+	        , TM.MEM_NICK
+	        , TM.MEM_MAIL
+	        , TM.MEM_HP
+	        , TM.REPORT
+	        , TM.MEM_PROFILE
+	        , TM.MEMEXP_YN
+    	FROM
+   		     ( SELECT
+	              TQ.QNA_NUM
+		 		, TQ.WRITER_ID
+		 		, TQ.QNA_TITLE
+		 		, TQ.QNA_CONTENT
+		 		, TQ.QNA_DATE
+		 		, TQ.VIEW_NUM
+		 		, TQ.ANSWER_TITLE
+		 		, TQ.ANSWER_CONTENT
+		 		, TQ.ANSWER_ID
+		 		, TQ.DEL_YN
+		 		, TQ.ANSWER_DATE
+	            , TAA.ATTATCH_NUM
+	            , TAA.ATTATCH_ORDER
+	            , TAA.ATTATCH_PLACE
+	            , TAA.FILE_PATH
+	            , TAA.ORIGIN_NM
+	            , TAA.SAVE_NM
+	            , TAA.ATTATCH_TYPE
+	            , TAA.ATTATCH_SIZE
+	            , TAA.DOWN_COUNT
+	            , TAA.ATTATCH_DATE
+	            , TAA.UPLOADER_ID
+		 	FROM
+	 			TB_QNA TQ LEFT OUTER JOIN TB_ATTATCH TAA ON (TQ.QNA_NUM = TAA.ATTATCH_PLACE)
+    	    ) TQA LEFT OUTER JOIN TB_MEMBER TM ON (TQA.WRITER_ID = TM.MEM_ID)
+	 	WHERE
+	 		TQA.QNA_NUM = #{qnaNum}
+	 </select>
+	 
+	 <update id="incrementView" parameterType="string">
+	 /* kr.or.ddit.mapper.admin.QnAMapper.incrementView */
+	 	UPDATE
+	 		TB_QNA
+	 	SET
+			VIEW_NUM = VIEW_NUM + 1
+		WHERE
+			QNA_NUM = #{qnaNum}
+	 </update>
+	 
+	 <update id="registerAnswer" parameterType="String">
+	 /* kr.or.ddit.mapper.admin.QnAMapper.registerAnswer */
+	 	UPDATE
+		    TB_QNA
+		SET
+		    ANSWER_ID = #{answerId}
+		    , ANSWER_CONTENT = #{answerContent}
+		    , ANSWER_DATE = SYSDATE
+		WHERE
+		    QNA_NUM = #{qnaNum}
+	 </update>
+	 
+
+
+</mapper>

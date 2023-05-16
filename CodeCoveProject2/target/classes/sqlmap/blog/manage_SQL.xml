@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.blog.ManageMapper">
+	
+	<sql id="cateSearchFrag">
+       	<trim prefix="AND" prefixOverrides="AND">
+        	<if test="searchWord != null and searchWord != ''">
+		         	INSTR(A.CATE_NM, #{searchWord}) > 0
+        	</if>
+       	</trim>
+	</sql>
+	
+	<select id="cateTotalRecord" resultType="int" parameterType="PaginationInfoVO">
+		SELECT COUNT(*)
+        FROM TB_BLOG_CATE A 
+        INNER JOIN TB_BLOG B ON(A.BLOG_ID = B.BLOG_ID)
+        where B.BLOGGER_ID=#{detailCondition.bloggerId}
+        <include refid="cateSearchFrag"/>
+	</select>
+
+	<select id="selectJsonCate" resultType="BlogCateVO" parameterType="PaginationInfoVO">
+		 SELECT B.*
+		FROM (SELECT ROWNUM RNUM, A.*
+		        FROM(SELECT
+                        A.CATE_NUM,
+                        A.BLOG_ID,
+                        A.CATE_NM,
+                        TO_CHAR(A.CATE_DATE,'YYYY-MM-DD') AS CATE_DATE,
+                        B.BLOGGER_ID
+                        FROM  TB_BLOG_CATE A,TB_BLOG B
+                        WHERE A.BLOG_ID=B.BLOG_ID
+                        AND B.BLOGGER_ID=#{detailCondition.bloggerId}
+                        <include refid="cateSearchFrag"/>
+                        ORDER BY CATE_DATE DESC
+            ) A    
+        ) B
+    WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<select id="checkNm" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM TB_BLOG_CATE
+		WHERE CATE_NM=#{upName}
+		AND BLOG_ID=#{blogId}
+	</select>
+	
+	<update id="updateCateNm" parameterType="map">
+		UPDATE TB_BLOG_CATE
+    	SET CATE_NM=#{upName}
+		WHERE
+    	CATE_NUM =#{cateNum}
+	</update>
+	
+	<update id="deleteCateNm" parameterType="String">
+		DELETE FROM TB_BLOG_CATE
+		WHERE CATE_NUM=#{delNum}
+	</update>
+	
+	<update id="deletePost" parameterType="String">
+		UPDATE TB_BLOG_POST
+		SET POST_DEL_YN='Y'
+		WHERE POST_CATE_NUM=#{delNum}
+	</update>
+	
+	<select id="selectBlogId" parameterType="String" resultType="String">
+		SELECT
+    	BLOG_ID
+		FROM TB_BLOG
+		WHERE BLOGGER_ID=#{memId}
+	</select>
+	
+	<insert id="insertCate" parameterType="map">
+		<selectKey keyProperty="cateNum" keyColumn="CATE_NUM" order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_BLOG_CATE', 'CATE_NUM', UPPER('BCAT'))
+			FROM DUAL
+		</selectKey>
+		INSERT INTO tb_blog_cate (
+		    CATE_NUM,
+		    BLOG_ID,
+		    CATE_NM,
+		    CATE_DATE
+		) VALUES (
+		    #{cateNum},
+		    #{blogId},
+		    #{upName},
+		    SYSDATE
+		)
+	</insert>
+	
+	<sql id="postSearchFrag">
+			<trim prefix="AND" prefixOverrides="AND">
+	       	<if test="searchWord != null and searchWord != ''">
+		       <choose>
+		       	<when test="searchType eq 'cateNm'">
+		       		 INSTR(B.CATE_NM, #{searchWord}) > 0 
+		       	</when>
+		       	<when test="searchType eq 'postTitle'">
+		       		 INSTR(A.POST_TITLE, #{searchWord}) > 0 
+		       	</when>
+		       	<otherwise>
+		       	    (
+			    	 INSTR(B.CATE_NM, #{searchWord}) > 0
+			    	 OR
+			    	 INSTR(A.POST_TITLE, #{searchWord}) > 0 
+		       		 )
+		       	</otherwise>
+		       </choose>
+		     </if>
+		     </trim>
+	</sql>
+	
+	<select id="postTotalRecord" resultType="int" parameterType="PaginationInfoVO">
+		SELECT COUNT(*)
+		FROM
+    	TB_BLOG_POST A
+        INNER JOIN TB_BLOG_CATE B ON(A.POST_CATE_NUM=B.CATE_NUM)
+    	WHERE A.BLOGGER_ID=#{detailCondition.bloggerId}
+    	AND A.POST_DEL_YN='N'
+    	<include refid="postSearchFrag" />
+	
+	</select>
+	
+	<select id="selectPostList" resultType="MyBlogPostVO" parameterType="PaginationInfoVO">
+		SELECT B.*
+		FROM (SELECT ROWNUM RNUM, A.*
+		        FROM(SELECT
+                            A.POST_NUM,
+                            A.POST_CATE_NUM,
+                            A.BLOGGER_ID,
+                            A.POST_TITLE,
+                            TO_CHAR(A.POST_DATE,'YYYY.mm.dd  HH24:MI') AS POST_DATE,
+                            B.CATE_NUM,
+                            B.CATE_NM  
+                        FROM
+                        TB_BLOG_POST A
+                        INNER JOIN TB_BLOG_CATE B ON(A.POST_CATE_NUM=B.CATE_NUM)
+                        WHERE A.POST_DEL_YN='N'
+                        AND A.BLOGGER_ID=#{detailCondition.bloggerId}
+                        <include refid="postSearchFrag" />
+                        ORDER BY A.POST_DATE DESC
+            ) A    
+        ) B
+    WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<update id="deletePostList" parameterType="MyBlogPostVO">
+		UPDATE TB_BLOG_POST
+    	SET POST_DEL_YN='Y'
+		WHERE 
+    	POST_NUM IN
+    	<foreach collection="postNumList" item="item" index="index" separator="," open="(" close=")">
+		 	#{item}
+		</foreach>
+	</update>
+	
+	<sql id="replySearchFrag">
+			<trim prefix="AND" prefixOverrides="AND">
+	       	<if test="searchWord != null and searchWord != ''">
+		       <choose>
+		       	<when test="searchType eq 'replyTitle'">
+		       		 INSTR(B.POST_TITLE, #{searchWord}) > 0 
+		       	</when>
+		       	<when test="searchType eq 'blReplyContent'">
+		       		 INSTR( A.BL_REPLY_CONTENT, #{searchWord}) > 0 
+		       	</when>
+		       	<otherwise>
+		       	    (
+			    	 INSTR(B.POST_TITLE, #{searchWord}) > 0
+			    	 OR
+			    	 INSTR( A.BL_REPLY_CONTENT, #{searchWord}) > 0 
+		       		 )
+		       	</otherwise>
+		       </choose>
+		     </if>
+		     </trim>
+	</sql>
+	
+	<select id="replyTotalRecord" resultType="int" parameterType="PaginationInfoVO">
+		SELECT COUNT(*)
+		FROM
+    	TB_BLOG_REPLY A
+        INNER JOIN TB_BLOG_POST B ON(A.POST_NUM=B.POST_NUM)
+    	WHERE A.BL_REPLY_WRITER=#{detailCondition.blReplyWriter}
+    	AND A.BL_REPLY_DEL_YN='N'
+    	 <include refid="replySearchFrag" />
+	</select>
+	<select id="selectReplyList" resultType="BlogReplyVO" parameterType="PaginationInfoVO">
+		SELECT B.*
+		FROM (SELECT ROWNUM RNUM, A.*
+		        FROM(SELECT
+                        A.BL_REPLY_NUM,
+                        A.POST_NUM,
+                        A.BL_REPLY_WRITER,
+                        A.BL_REPLY_CONTENT,
+                        A.BL_REPLY_DATE,
+                        A.PARENT_BL_REPLY_NUM,
+                        B.POST_TITLE,
+                        B.BLOGGER_ID
+                        FROM
+                        TB_BLOG_REPLY A
+                        INNER JOIN TB_BLOG_POST B ON(A.POST_NUM=B.POST_NUM)
+                        WHERE A.BL_REPLY_DEL_YN='N'
+                        AND A.BL_REPLY_WRITER=#{detailCondition.blReplyWriter}
+                        <include refid="replySearchFrag" />
+                        ORDER BY A.BL_REPLY_DATE DESC
+           	 ) A    
+         ) B
+    	WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<update id="deleteReplyList" parameterType="BlogReplyVO">
+		UPDATE TB_BLOG_REPLY
+    	SET BL_REPLY_DEL_YN='Y'
+		WHERE 
+    	BL_REPLY_NUM IN
+    	<foreach collection="blReplyNumList" item="item" index="index" separator="," open="(" close=")">
+		 	#{item}
+		</foreach>
+	</update>
+	
+</mapper>

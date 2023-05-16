@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.board.BlogBoardMapper">
+
+<!--블로그 게시글 수 조회-->
+	<select id="countBlBoList" parameterType="PaginationInfoVO" resultType="int">
+	 	SELECT
+	 		COUNT(*)
+	 	FROM
+	 		TB_BLOG_POST A
+	 	WHERE
+	 		1=1
+	 		<if test="searchWord != null and searchWord != ''">
+	 	AND
+	 		(	INSTR(A.BLOGGER_ID, #{searchWord}) > 0
+				OR
+	 			INSTR(A.POST_TITLE, #{searchWord}) > 0)
+	 			
+	 		</if>
+	 </select>
+
+
+<select id="publicBoardList" parameterType="String" resultType="MyBlogPostVO">
+select POST_NUM,
+	   POST_CATE_NUM,
+	   BLOGGER_ID,
+	   POST_TITLE,
+	   POST_CONTENT,
+	   POST_VIEW,
+	   POST_HEART,
+	   POST_DATE,
+	   POST_PUBLIC_YN,
+	   POST_TAG,
+	   POST_DEL_YN,
+	   THUMBNAIL
+	from TB_BLOG_POST
+   where POST_PUBLIC_YN='Y' and POST_DEL_YN='N'
+</select>
+
+<!--블로그 게시글 리스트 조회  -->
+	<select id="selectBlBoList" parameterType="PaginationInfoVO" resultType="MyBlogPostVO">
+	select b.*
+	from
+		(SELECT 
+			A.*, ROW_NUMBER() OVER(ORDER BY ROWNUM) RNUM
+		FROM 
+			(select 
+				a.POST_NUM,
+				a.POST_CATE_NUM,
+				a.BLOGGER_ID,
+				a.POST_TITLE,
+				a.POST_CONTENT,
+				a.POST_VIEW,
+				a.POST_HEART,
+				a.POST_DATE,
+				a.POST_PUBLIC_YN,
+				a.POST_TAG,
+				a.POST_DEL_YN,
+				a.THUMBNAIL,
+				c.mem_nick
+			from 
+				TB_BLOG_POST a
+			left outer join tb_member c on(a.BLOGGER_ID=c.mem_id)
+			where
+				1=1
+				and
+				POST_PUBLIC_YN='Y' and POST_DEL_YN='N'
+			<if test="searchWord != null and searchWord != ''">
+				AND (INSTR(A.BLOGGER_ID, #{searchWord}) > 0
+					OR INSTR(A.POST_TITLE, #{searchWord}) > 0)
+			</if>
+			ORDER BY A.POST_DATE DESC
+			) A
+		) B
+	WHERE 
+		RNUM BETWEEN #{startRow} AND #{endRow}
+</select>
+
+
+
+
+<resultMap type="MyBlogPostVO" id="postMap" autoMapping="true">
+		<id property="postNum" column="POST_NUM"/>
+		<collection property="attatchList" ofType="AttatchVO" autoMapping="true"/>
+	</resultMap>
+	
+	<select id="selectPublicPost" resultMap="postMap" parameterType="map">
+		SELECT 
+			A.POST_NUM
+			, A.POST_CATE_NUM
+			, A.BLOGGER_ID
+			, A.POST_TITLE
+			, A.POST_CONTENT
+			, A.POST_VIEW
+			, A.POST_HEART
+			, TO_CHAR(A.POST_DATE,'YYYY.mm.dd  HH24:MI') AS POST_DATE
+			, A.POST_PUBLIC_YN
+			, A.POST_TAG
+			, A.POST_DEL_YN
+			, B.CATE_NUM
+			, B.CATE_NM
+			, C.ATTATCH_NUM
+			, C.ATTATCH_ORDER
+			, C.FILE_PATH
+			, C.ORIGIN_NM
+			, C.SAVE_NM
+			, C.ATTATCH_TYPE
+			, C.ATTATCH_SIZE
+			, C.ATTATCH_DATE
+        FROM TB_BLOG_POST A 
+        INNER JOIN TB_BLOG_CATE B ON(A.POST_CATE_NUM = B.CATE_NUM)
+        LEFT OUTER JOIN TB_ATTATCH C ON(A.POST_NUM = C.ATTATCH_PLACE)
+		WHERE POST_NUM = #{postNum}
+		AND BLOGGER_ID = #{memId}
+
+	</select>
+	
+	<update id="incrementHit" parameterType="String">
+		UPDATE TB_BLOG_POST
+		SET POST_VIEW = POST_VIEW + 1
+		WHERE POST_NUM = #{post_num}
+	</update>
+
+</mapper>
+

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.member.LoginMapper">
+
+	<resultMap type="MemberVO" id="loginMap">
+		<result property="memId" column="MEM_ID" /> 
+		<result property="memPass" column="MEM_PASS" /> 
+		<result property="memName" column="MEM_NAME" /> 
+		<result property="memNick" column="MEM_NICK" /> 
+		<result property="memMail" column="MEM_MAIL" /> 
+		<result property="memHP" column="MEM_HP" /> 
+		<result property="report" column="REPORT" />
+		<result property="memProfile" column="MEM_PROFILE" />
+		<collection property="roleList" resultMap="MemberRoleMap"></collection> 
+	</resultMap>
+	<resultMap type="MemberRole" id="MemberRoleMap">
+		<result property="memId" column="MEM_ID" />
+		<result property="roleCode" column="ROLE_CODE" />
+	</resultMap>
+	
+	<select id="loginCheck" parameterType="MemberVO" resultMap="loginMap">
+		SELECT A.MEM_ID, A.MEM_PASS, A.MEM_NAME, A.MEM_NICK, A.MEM_MAIL, A.MEM_HP, A.REPORT, A.MEM_PROFILE
+		     , B.MEM_ID, B.ROLE_CODE
+		FROM TB_MEMBER A LEFT OUTER JOIN TB_ROLE_ASSIGNMENT B
+		ON(A.MEM_ID = B.MEM_ID)
+		WHERE  A.MEM_ID = #{memId}
+	</select>
+	
+	<select id="idCheck" parameterType="string" resultType="MemberVO">
+		select 
+			MEM_ID, MEM_PASS, MEM_NAME, MEM_NICK, MEM_MAIL, MEM_HP, REPORT, MEM_PROFILE
+		from TB_MEMBER
+		where mem_id = #{memId}
+	</select>
+	
+	<insert id="signup" parameterType="MemberVO">
+		insert into TB_MEMBER(
+			MEM_ID, MEM_PASS, MEM_NAME, MEM_NICK, MEM_MAIL, MEM_HP, REPORT, MEM_PROFILE
+		) values (
+			#{memId}, #{memPass}, #{memName}, #{memNick}, #{memMail}, #{memHP}, -1, #{memProfile}
+		)
+	</insert>
+	
+	<insert id="signupRole" parameterType="MemberRole">
+		insert into TB_ROLE_ASSIGNMENT(
+			MEM_ID, ROLE_CODE
+		) values (
+			#{memId}, #{roleCode}
+		)
+	</insert>
+	
+	<select id="idForgetProcess" parameterType="MemberVO" resultType="string">
+		select mem_id from TB_MEMBER
+		where mem_mail = #{memMail}
+		and mem_name = #{memName}
+	</select>
+	
+<!-- 	<select id="pwForgetProcess" parameterType="MemberVO" resultType="string"> -->
+<!-- 		select mem_id from TB_MEMBER -->
+<!-- 		where mem_id = #{memId}  -->
+<!-- 		and mem_mail = #{memMail} -->
+<!-- 		and mem_name = #{memName} -->
+<!-- 	</select> -->
+
+	<update id="updatePw" parameterType="MemberVO">
+		update tb_member 
+			set mem_pass = #{memPass}
+		where mem_id = #{memId}
+		and mem_name = #{memName}
+		and mem_mail = #{memMail}
+	</update>
+	
+	<!-- 회원가입시 블로그 생성 -->
+	<insert id="createBlogCategory" parameterType="BlogCateVO">
+		<selectKey keyProperty="cateNum" keyColumn="CATE_NUM"
+			order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_BLOG_CATE', 'CATE_NUM', UPPER('BCAT'))
+			FROM DUAL
+		</selectKey>
+		INSERT INTO tb_blog_cate (
+			CATE_NUM, BLOG_ID, CATE_NM,	CATE_DATE
+		) VALUES (
+			#{cateNum}, #{blogId}, '시작하기', SYSDATE
+		)
+	</insert>
+
+	<insert id="createBlog" parameterType="CreateBlogVO">
+		<selectKey keyProperty="blogId" keyColumn="BLOG_ID"
+			order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_BLOG', 'BLOG_ID', UPPER('BLOG'))
+			FROM DUAL
+		</selectKey>
+		INSERT INTO	TB_BLOG (
+			BLOG_ID, BLOGGER_ID
+		) VALUES ( 
+			#{blogId}, #{bloggerId}
+		)
+	</insert>
+	<!-- 회원가입시 블로그 생성 끝 -->
+	
+	
+	
+	<select id="checkWithdrawId" parameterType="String" resultType="int">
+		select count(*)
+		from tb_delmember
+		where mem_id = #{memId}
+	</select>
+</mapper>

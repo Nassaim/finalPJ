@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.project.IProjectMapper">
+
+	<insert id="register" parameterType="ProjectVO">
+		<selectKey keyProperty="pjId" keyColumn="PJ_ID"
+			order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_PROJECT', 'PJ_ID', UPPER('PROJ'))
+			FROM DUAL
+		</selectKey>
+		insert into tb_project(
+			PJ_ID, PJ_CREATOR_ID, PJ_NAME, PJ_PNUM, PJ_START_DATE, PJ_END_DATE, PJ_OBJ_TITLE,
+			PJ_CREATE_DATE, PJ_ADMIN_ID, PJ_ADMIN_UPDATE, PJ_STATUS_CODE, PJ_PROGRESS
+		)values(
+			#{pjId}, #{pjCreatorId}, #{pjName}, #{pjPnum}, #{pjStartDate}, #{pjEndDate}, #{pjObjTitle},
+			sysdate, #{pjAdminId}, sysdate, #{pjStatusCode}, #{pjProgress}
+		)
+	</insert>
+	
+	<select id="list" parameterType="String" resultType="ProjectVO">
+		select
+			p.PJ_ID, PJ_CREATOR_ID, PJ_NAME, PJ_PNUM, PJ_START_DATE, PJ_END_DATE, PJ_OBJ_TITLE,
+			PJ_CREATE_DATE, PJ_ADMIN_ID, PJ_ADMIN_UPDATE, PJ_STATUS_CODE, PJ_PROGRESS
+		from tb_project p, tb_colleague c
+		where c.mem_id = #{loginId}
+        and c.pj_id = p.pj_id
+		ORDER by PJ_CREATE_DATE desc
+	</select>
+	
+	<select id="detail" parameterType="String" resultType="ProjectVO">
+		select
+			PJ_ID, PJ_CREATOR_ID, PJ_NAME, PJ_PNUM,
+			to_char(PJ_START_DATE, 'yy-mm-dd') PJ_START_DATE,
+			to_char(PJ_END_DATE, 'yy-mm-dd') PJ_END_DATE, PJ_OBJ_TITLE,
+			PJ_CREATE_DATE, PJ_ADMIN_ID, PJ_ADMIN_UPDATE, PJ_STATUS_CODE, PJ_PROGRESS, cc.com_code_nm
+		from tb_project p, tb_com_code cc
+		where p.pj_status_code = cc.com_code
+   		and pj_id =  #{pjId}
+	</select>
+
+	<select id="comList" parameterType="String" resultType="ProjectVO">
+		select
+			com_code, com_code_grp, com_code_nm
+		from tb_com_code
+        where com_code_grp = #{codeGrp}
+	</select>
+	
+	<update id="modify" parameterType="ProjectVO">
+		update tb_project
+		set
+			PJ_NAME = #{pjName},
+			PJ_START_DATE = #{pjStartDate},
+			PJ_END_DATE = #{pjEndDate},
+			PJ_OBJ_TITLE = #{pjObjTitle},
+			PJ_STATUS_CODE = #{pjStatusCode},
+			PJ_PROGRESS = #{pjProgress}
+		where PJ_ID = #{pjId}
+	</update>
+	
+	<delete id="delete" parameterType="String">
+		delete from tb_project
+		where pj_id = #{pjId}
+	</delete>
+
+	<update id="adminModify" parameterType="ProjectVO">
+		update tb_project
+		set
+			PJ_ADMIN_ID = #{memId},
+			PJ_ADMIN_UPDATE = sysdate
+		where PJ_ID = #{pjId}
+	</update>
+</mapper>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.member.MypageMapper">
+
+
+<select id="totalList" resultType="MyExpertVO">
+	select B.epay_num, A.EPROD_NUM, A.EPROD_NAME, B. MY_EPROD, B.AMOUNT, B.EPAY_DATE, A.PROGRESS_CODE, A.EPROD_SUMMARY, (select eprod_cate_num from tb_exp_prod where eprod_num = a.eprod_num) as eprod_cate_num
+	from tb_myexpert A
+	inner join tb_eprod_payment B
+	on (A.MY_EPROD = B.MY_EPROD and B.EPAY_YN ='Y' and A.EPRODPAY_YN ='Y')
+	where A.BUYER_ID = #{memId}
+	order by b.epay_date asc
+</select>
+
+<select id="mentorList" resultType="ExpertVO">
+	select 
+	a.EXP_FORM_NUM, b.com_code_nm, a.EXP_REG_DATE, a.EXP_REFUSE
+	from tb_exp_form a, tb_com_code b
+	where a.EXP_APPR_CODE = b.com_code
+	and form_id = #{memId}
+	order by a.exp_reg_date desc
+</select>
+
+<insert id="mentorInsert" parameterType="ExpertVO">
+	insert into TB_EXP_FORM(
+		EXP_FORM_NUM, FORM_ID, EXP_FORM_CONTENT, EXP_FORM_ASSUME, EXP_REG_DATE, EXP_JOB_MAJOR, EXP_JOB_LEVEL, EXP_JOB_CURRENT
+		
+		)VALUES (
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_EXP_FORM', 'EXP_FORM_NUM', UPPER('EXPE'))
+			, #{formId}
+			, #{expFormContent}
+			, #{expFormAssume}
+			, SYSDATE
+			, #{expJobMajor}
+			, #{expJobLevel}
+			, #{expJobCurrent}
+			 )
+</insert>
+
+<select id="myFreeList" resultType="FreeBoardVO">
+	select FREE_NUM, FREE_TITLE, FREE_DATE, VIEW_NUM
+	from tb_freeboard
+	where writer_id = #{memId}
+	order by free_date desc
+</select>
+
+<select id="myCooList" resultType="CooBoardVO">
+	select COO_NM, COO_TITLE, COO_START_DATE, COO_END_DATE, COO_DATE, VIEW_NUM
+	from TB_COOBOARD
+	where writer_id = #{memId}
+	order by COO_DATE desc
+</select>
+
+<select id="myReplyList" resultType="MyReplyVO">
+
+	SELECT 
+	BO_REPLY_NUM as reply_number,
+	WRITER_ID as reply_id,
+	BO_REPLY_TARGET as post_num,
+	BO_REPLY_CONTENT as reply_content,
+	BO_REPLY_DATE as reply_date
+	       
+	FROM tb_board_reply
+	WHERE WRITER_ID = #{memId}
+	
+	UNION
+	
+	SELECT BL_REPLY_NUM as reply_number,
+	BL_REPLY_WRITER as reply_id,
+	POST_NUM as post_num, 
+	BL_REPLY_CONTENT as reply_content,
+	BL_REPLY_DATE as reply_date
+	      
+	FROM tb_blog_reply
+	WHERE BL_REPLY_WRITER = #{memId}
+	
+	ORDER BY reply_date desc
+
+</select>
+
+<select id="myQnaList" resultType="qnaVO">
+	select qna_num, writer_id, qna_title, view_num, 
+	qna_date, answer_date
+	from tb_qna
+	where writer_id = #{memId}
+	order by qna_date desc
+</select>
+
+<update id="updateMentorStatus" parameterType="String">
+	update tb_member
+	set memexp_yn = 'Y'
+	where mem_Id = #{memId}
+</update>
+
+<select id="getMentorDetail" resultType="ExpertVO">
+	select
+		A.EXP_FORM_NUM, A.FORM_ID, A.EXP_FORM_CONTENT, A.EXP_FORM_ASSUME, A.EXP_APPR_CODE, A.EXP_REFUSE, A.EXP_REG_DATE,
+		A.EXP_JOB_MAJOR, A.EXP_JOB_LEVEL, A.EXP_JOB_CURRENT, B.mem_name
+	from tb_exp_form A, tb_member B
+	where b.mem_id = a.form_id and a.form_id = #{memId}
+</select>
+
+<select id="getAttachFiles" resultType="AttatchVO">
+	select A.ATTATCH_NUM, A.ATTATCH_ORDER, A.ATTATCH_PLACE, A.FILE_PATH, A.ORIGIN_NM, A.SAVE_NM, A.ATTATCH_TYPE, A.ATTATCH_SIZE, A.ATTATCH_DATE
+	from TB_ATTATCH A, TB_EXP_FORM B
+	where A.ATTATCH_PLACE = B.exp_form_num
+	and B.EXP_FORM_NUM = #{expFormNum}
+</select>
+   
+<delete id="deleteFiles" parameterType="AttatchVO">
+	delete from TB_ATTATCH
+	where ATTATCH_PLACE = #{attatchPlace}
+	and ATTATCH_ORDER = #{attatchOrder}
+</delete>
+   
+<update id="mentorModify" parameterType="ExpertVO">
+      update tb_exp_form
+      set 
+          EXP_FORM_CONTENT = #{expFormContent}, 
+          EXP_FORM_ASSUME = #{expFormAssume}, 
+          EXP_REG_DATE = sysdate, 
+          EXP_JOB_MAJOR = #{expJobMajor}, 
+          EXP_JOB_LEVEL = #{expJobLevel}, 
+          EXP_JOB_CURRENT = #{expJobCurrent}
+      where EXP_FORM_NUM = #{expFormNum}
+</update>
+
+</mapper>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.board.CooBoardMapper">
+
+	<insert id="insertCooBoard" parameterType="CooBoardVO"
+		useGeneratedKeys="true">
+		<selectKey keyProperty="cooNm" keyColumn="COO_NM"
+			order="BEFORE" resultType="String">
+			SELECT
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_COOBOARD', 'COO_NM',
+			UPPER('cobo'))
+			FROM DUAL
+		</selectKey>
+		insert into TB_COOBOARD(
+		coo_nm, writer_id, pj_id, coo_title,
+		coo_content, coo_people_num,
+		coo_start_date
+		, coo_end_date, coo_done_yn,
+		view_num, coo_date
+		)values(
+		#{cooNm},#{writerId},#{pjId},#{cooTitle},#{cooContent},#{cooPeopleNum},#{cooStartDate},
+		#{cooEndDate},#{cooDoneYn},0,sysdate
+		)
+	</insert>
+
+	<!-- PJ_ADMIN_ID이 가지고 있는 프로젝트들 -->
+	<select id="selectProjList" resultType="ProjectVO">
+		select PJ_ID,
+		PJ_NAME,to_char(PJ_START_DATE, 'yy-mm-dd') PJ_START_DATE,
+		to_char(PJ_END_DATE, 'yy-mm-dd') PJ_END_DATE, PJ_ADMIN_ID,
+		PJ_STATUS_CODE
+		from TB_PROJECT
+		where PJ_ADMIN_ID= #{memId}
+	</select>
+
+	<!--PjId에 따른 프로젝트 상세정보 -->
+	<select id="selectPjId" resultType="ProjectVO">
+		        select
+            pj_id
+            , pj_name
+            , to_char(PJ_START_DATE, 'yy-mm-dd') PJ_START_DATE
+            , to_char(PJ_END_DATE, 'yy-mm-dd') PJ_END_DATE
+            , PJ_ADMIN_ID
+            , PJ_STATUS_CODE
+            , PJ_PNUM
+            , PJ_PROGRESS
+            , (select count(mem_id) from tb_colleague where pj_id = TB_PROJECT.pj_id) as MEM_COUNT
+        from 
+            TB_PROJECT
+		where PJ_ID=#{pjId}
+	</select>
+
+
+	<!--협업 프로젝트 게시글 수 조회 -->
+	<select id="countCoBoList" parameterType="PaginationInfoVO"
+		resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		tb_cooboard A
+		WHERE
+		1=1
+		<if test="searchWord != null and searchWord != ''">
+			AND
+			( INSTR(A.WRITER_ID, #{searchWord}) > 0
+			OR
+			INSTR(A.coo_title, #{searchWord}) > 0)
+
+		</if>
+	</select>
+
+	<!--협업 프로젝트 게시글 리스트 조회 -->
+	<select id="selectPjBoList" parameterType="PaginationInfoVO"
+		resultType="CooBoardVO">
+		select
+		b.*
+		from
+		(SELECT
+		A.*, ROW_NUMBER() OVER(ORDER BY ROWNUM) RNUM
+		FROM
+		(SELECT
+		a.coo_nm,
+		a.writer_id,
+		a.pj_id,
+		a.coo_title,
+		a.coo_content,
+		a.coo_people_num,
+		TO_CHAR(a.coo_start_date, 'yy-mm-dd') AS
+		coo_start_date,
+		TO_CHAR(a.coo_end_date, 'yy-mm-dd') AS coo_end_date,
+		a.coo_done_yn,
+		a.view_num,
+		TO_CHAR(a.coo_date, 'yy-mm-dd') AS coo_date,
+		b.mem_nick,
+		(
+		SELECT COUNT(mem_id)
+		FROM TB_COLLEAGUE
+		WHERE PJ_ID = a.pj_id
+		) AS
+		mem_count
+		FROM
+		tb_cooboard a
+		LEFT OUTER JOIN tb_member b ON a.writer_id =
+		b.mem_id
+		where
+		1=1
+		<if test="searchWord != null and searchWord != ''">
+			AND ( INSTR(A.writer_id, #{searchWord}) > 0
+			OR
+			INSTR(A.coo_title, #{searchWord}) > 0)
+		</if>
+		order by
+		a.coo_date desc
+		) A
+		) B
+		WHERE
+		RNUM BETWEEN #{startRow} AND
+		#{endRow}
+	</select>
+
+
+	<!-- service.retrievePost(cooNm); -->
+	<!--아이디, 제목, 내용(첨부파일 포함) 불러오기 -->
+	<resultMap type="CooBoardVO" id="cooMap" autoMapping="true">
+		<id property="cooNm" column="coo_nm" />
+		<collection property="attatchList" ofType="AttatchVO"
+			autoMapping="true" />
+	</resultMap>
+
+	<!--협업 게시글 상세 불러오기  -->
+	<select id="selectCooBoard" resultMap="cooMap"
+		parameterType="map">
+		select
+		a.coo_nm
+		, a.writer_id
+		, a.coo_title
+		, a.coo_content
+		, a.coo_people_num
+		,
+		to_char(a.coo_start_date, 'yyyy-mm-dd') as
+		coo_start_date
+		,
+		to_char(a.coo_end_date, 'yyyy-mm-dd') as coo_end_date
+		,
+		a.coo_done_yn
+		,
+		to_char(a.coo_date,'yyyy.mm.dd') as coo_date
+		,
+		b.attatch_num
+		,
+		b.attatch_order
+		, b.file_path
+		, b.origin_nm
+		, b.save_nm
+		,
+		b.attatch_type
+		,
+		b.attatch_size
+		, b.attatch_date
+		, c.pj_name
+		, c.pj_id
+		,
+		d.mem_nick
+		from tb_project c
+		left outer join tb_cooboard a on(c.pj_id =
+		a.pj_id)
+		left outer join
+		tb_attatch b on(a.coo_nm = b.attatch_place)
+		left outer join tb_member d
+		on(a.writer_id=d.mem_id)
+		where
+		coo_nm =
+		#{cooNm}
+	</select>
+
+
+	<!--게시글 상세보기, 조회수 -->
+	<select id="read" parameterType="String" resultType="CooBoardVO">
+		select
+		coo_nm, writer_id, pj_id, coo_title, coo_content, coo_people_num,
+		coo_start_date, coo_end_date, coo_done_yn, view_num, coo_date
+		where
+		coo_nm=#{cooNm}
+	</select>
+
+	<update id="incrementHit" parameterType="String">
+		update TB_COOBOARD
+		set
+		view_num=view_num+1
+		where coo_nm=#{cooNm}
+	</update>
+
+	<!--협업신청서 제출  -->
+	<insert id="insertApplyForm" parameterType="CooFormVO">
+		INSERT INTO
+		TB_COOFORM (
+		coo_form_num,
+		applicant_id,
+		coo_nm,
+		coo_form_content,
+		coo_assume_attatch
+		) VALUES (
+		fn_create_num(to_char(sysdate,'yymmdd'),
+		'TB_COOFORM',
+		'coo_form_num', UPPER('COFO'))
+		, #{applicantId}
+		, #{cooNm}
+		,
+		#{cooFormContent}
+		, #{cooAssumeAttatch, jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<select id="participantNum" parameterType="String"
+		resultType="int">
+		SELECT COUNT(MEM_ID)
+		FROM TB_COLLEAGUE
+		WHERE PJ_ID=#{pjId}
+	</select>
+	
+	<resultMap type="CooFormVO" id="cooFormFileMap">
+		<id property="cooFormNum" column="COO_FORM_NUM"/>
+		<result property="applicantId" column="APPLICANT_ID"/>
+		<result property="cooNm" column="COO_NM"/>
+		<result property="cooFormContent" column="COO_FORM_CONTENT"/>
+		<collection property="attatchList" resultMap="attatchMap"></collection>
+	</resultMap>
+	
+	<resultMap type="AttatchVO" id="attatchMap">
+	<result property="attatchNum" column="ATTATCH_NUM"/>
+	<result property="attatchOrder" column="ATTATCH_ORDER"/>
+	<result property="attatchPlace" column="ATTATCH_PLACE"/>
+	<result property="filePath" column="FILE_PATH"/>
+	<result property="originNm" column="ORIGIN_NM"/>
+	<result property="saveNm" column="SAVE_NM"/>
+	<result property="attatchType" column="ATTATCH_TYPE"/>
+	<result property="attatchSize" column="ATTATCH_SIZE"/>
+	<result property="downNumber" column="DOWN_COUNT"/>
+	<result property="attatchDate" column="ATTATCH_DATE"/>
+	<result property="uploaderId" column="UPLOADER_ID"/>
+	</resultMap>
+
+	<select id="cooFormDetail" parameterType="String" resultMap="cooFormFileMap">
+		select
+			COO_FORM_NUM, APPLICANT_ID, COO_NM, COO_FORM_CONTENT,
+			ATTATCH_NUM, ATTATCH_ORDER, ATTATCH_PLACE, FILE_PATH, ORIGIN_NM, SAVE_NM, 
+			ATTATCH_TYPE, ATTATCH_SIZE, DOWN_COUNT, ATTATCH_DATE, UPLOADER_ID
+		from TB_COOFORM c left outer join TB_ATTATCH a on(c.COO_FORM_NUM = a.ATTATCH_PLACE)
+		where c.COO_FORM_NUM = #{cooFormNum}
+	</select>
+	
+	<delete id="cooFormDelete" parameterType="String">
+		delete from tb_cooform
+		where coo_form_num = #{cooFormNum}
+	</delete>
+	
+	<!--협업게시글 수정  -->
+	<update id="updateCooBoard" parameterType="CooBoardVO">
+	update tb_cooboard
+		set
+			COO_TITLE=#{cooTitle},
+			COO_CONTENT=#{cooContent},
+			COO_DATE=sysdate
+		where COO_NM=#{cooNm}
+	</update>
+</mapper>

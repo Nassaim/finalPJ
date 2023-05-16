@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.blog.MyCalendarMapper">
+	<select id="selectMyCalList" resultType="MyCalendarVO" parameterType="String">
+		SELECT
+    	A.CAL_NUM,
+    	A.BLOG_ID,
+    	A.CAL_TITLE,
+    	TO_CHAR(A.CAL_START_DATE,'YYYY-MM-DD HH24:MI:SS') AS CAL_START_DATE,
+    	TO_CHAR(A.CAL_END_DATE,'YYYY-MM-DD HH24:MI:SS') AS CAL_END_DATE,
+    	A.CAL_CONTENT,
+    	A.CAL_COLOR
+		FROM TB_BLOG_CALENDAR A,TB_BLOG B
+		WHERE A.BLOG_ID= B.BLOG_ID
+		AND B.BLOGGER_ID=#{sessionId}
+	</select>
+
+	<select id="selectBlogId" parameterType="String" resultType="String">
+		SELECT BLOG_ID
+		FROM TB_BLOG
+		WHERE BLOGGER_ID=#{bloggerId}
+	</select>
+	
+	<insert id="insertMyCal" parameterType="MyCalendarVO">
+		<selectKey keyProperty="calNum" keyColumn="CAL_NUM" order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_BLOG_CALENDAR', 'CAL_NUM', UPPER('BCAL'))
+			  FROM DUAL
+		</selectKey>
+		INSERT INTO TB_BLOG_CALENDAR 
+    	(
+	        CAL_NUM,
+	        BLOG_ID,
+	        CAL_TITLE,
+	        CAL_START_DATE,
+	        CAL_END_DATE,
+	        CAL_CONTENT,
+	        CAL_COLOR
+		) VALUES (
+		    #{calNum},
+		    #{blogId},
+		    #{calTitle},
+		    TO_DATE(#{calStartDate},'YYYY-MM-DD HH24:MI'),
+		    TO_DATE(#{calEndDate},'YYYY-MM-DD HH24:MI'),
+		    #{calContent},
+		    #{calColor}
+		)
+
+	</insert>
+	
+	<update id="updateCalendar" parameterType="MyCalendarVO">
+		UPDATE TB_BLOG_CALENDAR
+		   SET CAL_TITLE = #{calTitle},
+		       CAL_START_DATE = TO_DATE(#{calStartDate},'YYYY-MM-DD HH24:MI'),
+		       CAL_END_DATE = TO_DATE(#{calEndDate},'YYYY-MM-DD HH24:MI'),
+		       CAL_CONTENT = #{calContent},
+		       CAL_COLOR = #{calColor}
+		 WHERE CAL_NUM = #{calNum}
+	</update>
+	
+	<delete id="deleteCalendar" parameterType="String">
+		DELETE FROM TB_BLOG_CALENDAR
+		 WHERE CAL_NUM = #{calNum}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="kr.or.ddit.mapper.project.ProjectFolderMapper">
+	<select id="selectProjectFolderList" parameterType="ColleagueVO" resultType="ProjectFolderVO">
+		SELECT *
+		FROM TB_WFOLDER
+		WHERE COL_NUM = #{colNum}
+		AND PARENT_WFOLDER_NUM IS NULL
+		AND WFOLDER_DEL = 'N'
+	</select>
+
+	<select id="selectProjectFolderAllList"
+		parameterType="ColleagueVO" resultType="ProjectFolderVO">
+		SELECT WFOLDER_NUM,
+		WFOLDER_NAME
+		FROM TB_WFOLDER
+		WHERE COL_NUM = #{colNum}
+		AND WFOLDER_DEL = 'N'
+	</select>
+
+	<select id="selectProjectChildFolderList"
+		parameterType="ProjectFolderVO" resultType="ProjectFolderVO">
+		SELECT *
+		FROM TB_WFOLDER
+		WHERE COL_NUM = #{colNum}
+		AND PARENT_WFOLDER_NUM = #{wfolderNum}
+		AND WFOLDER_DEL = 'N'
+		ORDER BY 1
+	</select>
+
+	<insert id="insertNoParentFolder" parameterType="ProjectFolderVO">
+		<selectKey keyProperty="wfolderNum" keyColumn="WFOLDER_NUM"	order="BEFORE" resultType="String">
+			SELECT
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_WFOLDER', 'WFOLDER_NUM',
+			UPPER('WFOD'))
+			FROM DUAL
+		</selectKey>
+		INSERT INTO TB_WFOLDER(
+		WFOLDER_NUM,
+		COL_NUM,
+		WFOLDER_NAME,
+		PARENT_WFOLDER_NUM
+		)
+		VALUES(
+		#{wfolderNum},
+		#{colNum},
+		#{wfolderName},
+		NULL
+		)
+	</insert>
+
+	<insert id="insertYesParentFolder"
+		parameterType="ProjectFolderVO">
+		<selectKey keyProperty="wfolderNum" keyColumn="WFOLDER_NUM"
+			order="BEFORE" resultType="String">
+			SELECT
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_WFOLDER', 'WFOLDER_NUM',
+			UPPER('WFOD'))
+			FROM DUAL
+		</selectKey>
+		INSERT INTO TB_WFOLDER(
+		WFOLDER_NUM,
+		COL_NUM,
+		WFOLDER_NAME,
+		PARENT_WFOLDER_NUM
+		)
+		VALUES(
+		#{wfolderNum},
+		#{colNum},
+		#{wfolderName},
+		#{parentWfolderNum}
+		)
+	</insert>
+
+	<resultMap type="ProjectFileVO" id="fileList"
+		autoMapping="true">
+		<id property="wfolderFileNum" column="WFOLDER_FILE_NUM" />
+		<collection property="attatchVO" ofType="AttatchVO"
+			autoMapping="true" />
+	</resultMap>
+
+	<select id="selectFileList" parameterType="ProjectFileVO"
+		resultMap="fileList">
+		SELECT A.*, B.ATTATCH_ORDER, B.ATTATCH_PLACE,
+		B.FILE_PATH, B.ORIGIN_NM, B.SAVE_NM, B.ATTATCH_TYPE,
+		B.ATTATCH_SIZE, B.DOWN_NUMBER, TO_CHAR(B.ATTATCH_DATE,'YYYY-MM-DD') AS ATTATCH_DATE, B.UPLOADER_ID
+		FROM TB_WFOLDER_FILE A, TB_ATTATCH B, TB_WFOLDER C
+		WHERE A.ATTATCH_NUM = B.ATTATCH_NUM
+		AND A.WFOLDER_NUM = C.WFOLDER_NUM
+		AND A.WFOLDER_NUM = #{wfolderNum}
+		AND C.WFOLDER_DEL = 'N'
+		<if
+			test="@org.apache.commons.lang3.StringUtils@isNotBlank(searchCondition.searchWord)">
+			AND
+			INSTR(B.ORIGIN_NM,#{searchCondition.searchWord}) > 0
+		</if>
+	</select>
+
+	<insert id="insertFolderFile" parameterType="ProjectFileVO">
+		INSERT INTO
+		TB_WFOLDER_FILE
+		(
+		WFOLDER_FILE_NUM,
+		WFOLDER_NUM,
+		ATTATCH_NUM
+		)
+		VALUES
+		(
+		#{wfolderFileNum},
+		#{wfolderNum},
+		#{attatchNum}
+		)
+	</insert>
+
+	<delete id="deleteFile" parameterType="String">
+		DELETE FROM
+		TB_WFOLDER_FILE
+		WHERE ATTATCH_NUM = #{attatchNum}
+	</delete>
+
+	<resultMap type="ProjectFolderVO" id="uploadFileList"
+		autoMapping="true">
+		<id property="wfolderNum" column="WFOLDER_NUM" />
+		<collection property="fileList" ofType="ProjectFileVO"
+			autoMapping="true">
+			<collection property="attatchVO" ofType="AttatchVO"
+				autoMapping="true" />
+		</collection>
+	</resultMap>
+
+	<select id="selectUploadFileList" parameterType="ColleagueVO"
+		resultMap="uploadFileList">
+		SELECT A.*, B.*, C.ATTATCH_ORDER, C.ATTATCH_PLACE,
+		C.FILE_PATH, C.ORIGIN_NM, C.SAVE_NM, C.ATTATCH_TYPE,
+		C.ATTATCH_SIZE, C.DOWN_NUMBER, C.ATTATCH_DATE, C.UPLOADER_ID
+		FROM TB_WFOLDER A, TB_WFOLDER_FILE B,TB_ATTATCH C
+		WHERE A.WFOLDER_NUM = B.WFOLDER_NUM
+		AND B.ATTATCH_NUM = C.ATTATCH_NUM
+		AND B.WFOLDER_FILE_NUM = C.ATTATCH_PLACE
+		AND A.COL_NUM = #{colNum}
+	</select>
+
+	<update id="deleteFolder" parameterType="ProjectFolderVO">
+		UPDATE TB_WFOLDER
+		SET WFOLDER_DEL = 'Y'
+		WHERE WFOLDER_NUM = #{wfolderNum}
+	</update>
+
+</mapper>

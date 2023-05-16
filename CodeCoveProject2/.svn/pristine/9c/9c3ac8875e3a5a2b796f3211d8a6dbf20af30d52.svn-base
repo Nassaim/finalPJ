@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.project.IWorkMapper">
+
+	<insert id="register" parameterType="WorkVO">
+		<selectKey keyProperty="workNum" keyColumn="WORK_NUM"
+			order="BEFORE" resultType="String">
+			SELECT fn_create_num(to_char(sysdate,'yymmdd'), 'TB_WORK', 'WORK_NUM', UPPER('WORK'))
+			FROM DUAL
+		</selectKey>
+		insert into tb_work(
+			WORK_NUM, PJ_ID, WORK_REQ, WORK_TITLE, WORK_CONTENT, WORK_STATUS_CODE, WORK_START_DATE, WORK_END_DATE,
+			WORK_PRIORITY, WORK_PROGRESS, PARENT_WORK_NUM, WORK_COLOR, WORK_CREATE_DATE
+		)values(
+			#{workNum}, #{pjId}, #{workReq}, #{workTitle}, #{workContent}, #{workStatusCode}, #{workStartDate}, #{workEndDate},
+			#{workPriority}, #{workProgress}, #{parentWorkNum}, #{workColor}, sysdate
+		)
+	</insert>
+	
+	<select id="list" parameterType="String" resultType="WorkVO">
+		select
+			WORK_NUM, PJ_ID, WORK_REQ, WORK_TITLE, WORK_CONTENT, WORK_STATUS_CODE,
+			to_char(WORK_START_DATE, 'yyyy-mm-dd') WORK_START_DATE, to_char(WORK_END_DATE, 'yyyy-mm-dd') WORK_END_DATE,
+			WORK_PRIORITY, WORK_PROGRESS, PARENT_WORK_NUM, WORK_COLOR, WORK_CREATE_DATE
+		from tb_work
+		where PJ_ID= #{pjId}
+		order by work_create_date desc
+	</select>
+
+	<delete id="delete" parameterType="String">
+		delete from tb_work
+		where work_num = #{workNum}
+	</delete>
+
+	<delete id="workAllDelete" parameterType="String">
+		delete from tb_work
+		where pj_id = #{pjId}
+	</delete>
+	
+	<update id="modify" parameterType="WorkVO">
+		update tb_work
+		set
+			WORK_TITLE = #{workTitle},
+			WORK_CONTENT = #{workContent},
+			WORK_STATUS_CODE = #{workStatusCode},
+			WORK_START_DATE = #{workStartDate},
+			WORK_END_DATE = #{workEndDate},
+			WORK_PRIORITY = #{workPriority},
+			WORK_PROGRESS = #{workProgress}
+		where WORK_NUM = #{workNum}
+	</update>
+	
+	<resultMap type="WorkVO" id="workFileMap">
+		<id property="workNum" column="WORK_NUM"/>
+		<result property="pjId" column="PJ_ID"/>
+		<result property="workReq" column="WORK_REQ"/>
+		<result property="workTitle" column="WORK_TITLE"/>
+		<result property="workContent" column="WORK_CONTENT"/>
+		<result property="workStatusCode" column="WORK_STATUS_CODE"/>
+		<result property="workStartDate" column="WORK_START_DATE"/>
+		<result property="workEndDate" column="WORK_END_DATE"/>
+		<result property="workPriority" column="WORK_PRIORITY"/>
+		<result property="workProgress" column="WORK_PROGRESS"/>
+		<result property="parentWorkNum" column="PARENT_WORK_NUM"/>
+		<result property="workColor" column="WORK_COLOR"/>
+		<result property="workCreateDate" column="WORK_CREATE_DATE"/>
+		<collection property="attatchList" resultMap="attatchMap"></collection>
+	</resultMap>
+	
+	<resultMap type="AttatchVO" id="attatchMap">
+	<result property="attatchNum" column="ATTATCH_NUM"/>
+	<result property="attatchOrder" column="ATTATCH_ORDER"/>
+	<result property="attatchPlace" column="ATTATCH_PLACE"/>
+	<result property="filePath" column="FILE_PATH"/>
+	<result property="originNm" column="ORIGIN_NM"/>
+	<result property="saveNm" column="SAVE_NM"/>
+	<result property="attatchType" column="ATTATCH_TYPE"/>
+	<result property="attatchSize" column="ATTATCH_SIZE"/>
+	<result property="downNumber" column="DOWN_COUNT"/>
+	<result property="attatchDate" column="ATTATCH_DATE"/>
+	<result property="uploaderId" column="UPLOADER_ID"/>
+	</resultMap>
+
+	<select id="workFileDetail" parameterType="String" resultMap="workFileMap">
+		select
+			WORK_NUM, PJ_ID, WORK_REQ, WORK_TITLE, WORK_CONTENT, WORK_STATUS_CODE, WORK_START_DATE, WORK_END_DATE,
+			WORK_PRIORITY, WORK_PROGRESS, PARENT_WORK_NUM, WORK_COLOR, WORK_CREATE_DATE,
+			ATTATCH_NUM, ATTATCH_ORDER, ATTATCH_PLACE, FILE_PATH, ORIGIN_NM, SAVE_NM, 
+			ATTATCH_TYPE, ATTATCH_SIZE, DOWN_COUNT, ATTATCH_DATE, UPLOADER_ID
+		from TB_WORK w left outer join TB_ATTATCH a on(w.WORK_NUM = a.ATTATCH_PLACE)
+		where w.WORK_NUM = #{workNum}
+	</select>
+	
+	<update id="calendarWorkModify" parameterType="WorkVO">
+		update tb_work
+		set
+			WORK_TITLE = #{workTitle},
+			WORK_CONTENT = #{workContent},
+			WORK_START_DATE = #{workStartDate},
+			WORK_END_DATE = #{workEndDate},
+			WORK_COLOR = #{workColor}
+		where WORK_NUM = #{workNum}
+	</update>
+	
+	<update id="boardModify" parameterType="WorkVO">
+		update tb_work
+		set
+			WORK_STATUS_CODE = #{workStatusCode}
+		where WORK_NUM = #{workNum}
+	</update>
+	
+	<select id="selectExitWork" parameterType="ColleagueVO" resultType="ColleagueVO">
+		select
+		    work_num
+		from tb_work
+		where pj_id = #{pjId}
+		and work_req = #{memId}
+	</select>
+	
+	<select id="myCalList" parameterType="String" resultType="WorkVO">
+		select
+		    c.col_num, c.mem_id, wa.assignment_num,
+		    wo.work_num, wo.pj_id, wo.work_req, wo.work_title, wo.work_content, wo.work_status_code,
+		    to_char(WORK_START_DATE, 'yyyy-mm-dd') WORK_START_DATE, to_char(WORK_END_DATE, 'yyyy-mm-dd') WORK_END_DATE,
+		    wo.work_priority, wo.work_progress, wo.work_color, wo.work_create_date, p.pj_name
+		from tb_colleague c, tb_work_assignment wa, tb_work wo, tb_project p
+		where c.mem_id = #{loginId}
+		and c.col_num = wa.col_num
+		and wa.work_num = wo.work_num
+		and wo.pj_id = p.pj_id
+	</select>
+
+</mapper>

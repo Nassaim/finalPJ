@@ -1,0 +1,456 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<style>
+
+.carousel-item > img {
+	height: 300px;
+}
+
+.button_container {
+  left: 0;
+  right: 0;
+  top: 30%;
+}
+
+.btn {
+  border: none;
+  display: block;
+  text-align: center;
+  cursor: pointer;
+  text-transform: uppercase;
+  outline: none;
+  overflow: hidden;
+  position: relative;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  background-color: #FFFFFF;
+  padding: 10px 30px;
+  margin: 0 auto;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.20);
+}
+
+.btn span {
+  position: relative; 
+  font-weight : bold;
+  z-index: 1;
+}
+
+ .btn:after { 
+   content: ""; 
+   position: absolute; 
+   left: 0; 
+   top: 0; 
+   height: 490%; 
+   width: 140%; 
+   background: white; 
+/*    -webkit-transition: all .5s ease-in-out;  */
+/*    transition: all .5s ease-in-out;  */
+/*    -webkit-transform: translateX(-98%) translateY(-25%) rotate(45deg);  */
+/*    transform: translateX(-98%) translateY(-25%) rotate(45deg);  */
+    color: white; 
+
+	
+   font-weight : bold; 
+ } 
+
+ .btn:hover:after { 
+   -webkit-transform: translateX(-9%) translateY(-25%) rotate(45deg); 
+   transform: translateX(-9%) translateY(-25%) rotate(45deg); 
+   background: #00c7ae; 
+   color: white !impotant;
+   font-weight : bold; 
+ } 
+</style>
+
+<section class="container pt-10">
+	<div class="card">
+		<div class="row">
+			<div class="d-flex">
+				<div class="col-sm-6 text-center">
+					<h4 class="h3 text-center pt-6">We help you find the Best
+						Solution</h4>
+					<h2 class="h2 text-center">
+						<strong>구인부터 관리까지 - </strong>
+					</h2>
+					<h2 class="h2 text-center">
+						<strong>협업툴 <span style="color: #00c7ae;">CodeCove</span></strong>
+					</h2>
+					<input id="joinBtn" type="button" value="회원가입"
+						class="mt-3 py-3 px-5 btn"
+						style="background-color: #00c7ae; color: white; font-weight: bold;">
+				</div>
+				<div class="col-sm-6 pe-3">
+					<div id="mainCarousel" class="carousel slide"
+						data-bs-ride="carousel">
+						<div class="carousel-indicators">
+							<button type="button" data-bs-target="#mainCarousel"
+								data-bs-slide-to="0" class="active" aria-current="true"
+								aria-label="Slide 1"></button>
+							<button type="button" data-bs-target="#mainCarousel"
+								data-bs-slide-to="1" aria-label="Slide 2"></button>
+							<button type="button" data-bs-target="#mainCarousel"
+								data-bs-slide-to="2" aria-label="Slide 3"></button>
+						</div>
+						<div class="carousel-inner">
+							<div class="carousel-item">
+								<img
+									src="https://images.unsplash.com/photo-1568992687947-868a62a9f521?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1332&q=80"
+									class="d-block w-100" alt="...">
+								<div class="carousel-caption d-none d-md-block">
+									<h5>Office 너머의 Office</h5>
+									<p>손쉬운 프로젝트 생성과 직관적인 관리</p>
+								</div>
+							</div>
+							<div class="carousel-item active">
+								<img
+									src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
+									class="d-block w-100" alt="...">
+								<div class="carousel-caption d-none d-md-block">
+									<h5>직접 선택하는 Solution</h5>
+									<p>다양한 선택지를 클릭 한 번으로</p>
+								</div>
+							</div>
+							<div class="carousel-item">
+								<img
+									src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+									class="d-block w-100" alt="...">
+								<div class="carousel-caption d-none d-md-block">
+									<h5>함께하기에 즐거운 개발</h5>
+									<p>다양한 사람을 한 곳에서</p>
+								</div>
+							</div>
+							<button class="carousel-control-prev" type="button"
+								data-bs-target="#mainCarousel" data-bs-slide="prev">
+								<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+								<span class="visually-hidden">Previous</span>
+							</button>
+							<button class="carousel-control-next" type="button"
+								data-bs-target="#mainCarousel" data-bs-slide="next">
+								<span class="carousel-control-next-icon" aria-hidden="true"></span>
+								<span class="visually-hidden">next</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="container">
+	<div class="p-4 shadow-lg mb-5">
+		<div class="d-flex align-items-center mb-4">
+			<div class="flex-grow-1 border-bottom"></div>
+		</div>
+		<div class="text-body-secondary">CodeCove는 현재</div>
+		<!--Countup-->
+		<h2 data-countup='{"startVal": 0}' data-to="126" data-aos
+			data-aos-once="false" data-aos-id="countup:in"
+			class="display-4 fw-normal text-primary text-center"
+			style="color: #00c7ae;">0</h2>
+		<!--Text-->
+		<div class="text-body-secondary text-end">개의 Projects와 함께합니다.</div>
+	</div>
+</section>
+
+<section class="container">
+	<div class="row">
+		<h3 class="h3 mt-2 pb-2" style="color: darkcyan;">CodeCove에서는 함께할 개발자를 찾는 여러 프로젝트가 기다리고 있어요!</h3>
+	</div>
+	<div class="row">
+		<div class="d-flex">
+			<c:forEach items="${coboList}" var="coboList" varStatus="loop">
+				<c:if test="${loop.index <= 2}">
+					<div class="card col-4 px-1 mx-1" style="text-align: center;">
+						<img alt="" class="card-img-top" src="...">
+						<div class="card-body">
+							<h5 class="card-title my-3" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${coboList.cooTitle }</h5>
+							<div class="flex-grow-1">
+								<div class="flex-shrink-0 d-flex justify-content-end mt-3">
+									<c:if test="${coboList.cooDoneYn eq 'Y'}">
+										<span class="badge py-1 lh-base position-relative z-2 bg-danger text-white me-2 px-3">종료</span>
+									</c:if>
+									<c:if test="${coboList.cooDoneYn eq 'N'}">
+										<span class="badge py-1 lh-base position-relative z-2 bg-primary-subtle text-primary me-2 px-3">진행</span>
+									</c:if>
+									<i class='bx bx-calendar'></i>
+									<small 	class="text-body-secondary"> 프로젝트 기간
+										:${coboList.cooStartDate} ~ ${coboList.cooEndDate}</small>
+									<%-- 														<small class="text-body-secondary">작성일:${coboList.cooDate}</small> --%>
+								</div>
+								
+								<ul class="d-flex justify-content-end small flex-wrap list-unstyled mb-2">
+									<li class="me-4 mt-2"><i class='bx bxs-user-circle'></i>&nbsp;${coboList.memNick }</li>
+									<li class="me-4 mt-2 text-body-secondary d-flex align-items-center">
+										<i class='bx bx-group'></i>&nbsp;${coboList.cooPeopleNum}명</li>
+									<li class="mt-2 text-body-secondary d-flex align-items-center">작성일:${coboList.cooDate}</li>
+								</ul>
+							</div>
+							<!--Date-->
+							<div class="row mt-3">
+								<div class="button_container d-flex">
+									<a href="/coco/cooBoard/read?cooNm=${coboList.cooNm}" class="btn">
+										<button id="btn" style="border: none; background-color: transparent;"><span style="border: none; background-color: transparent;">프로젝트 바로 가기</span></button>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</c:if>
+			</c:forEach>
+
+			<!-- 			<div class="card col-4 px-1 mx-1"> -->
+			<!-- 				<img alt="" class="card-img-top" src="..."> -->
+			<!-- 				<div class="card-body"> -->
+			<!-- 					<h5 class="card-title">Card Title</h5> -->
+			<!-- 					<p class="card-text">프로젝트에 대한 설명 부분</p> -->
+			<!-- 					<a href="#" class="btn">프로젝트 바로 가기</a> -->
+			<!-- 				</div> -->
+			<!-- 			</div> -->
+			<!-- 			<div class="card col-4 px-1 mx-1"> -->
+			<!-- 				<img alt="" class="card-img-top" src="..."> -->
+			<!-- 				<div class="card-body"> -->
+			<!-- 					<h5 class="card-title">Card Title</h5> -->
+			<!-- 					<p class="card-text">프로젝트에 대한 설명 부분</p> -->
+			<!-- 					<a href="#" class="btn">프로젝트 바로 가기</a> -->
+			<!-- 				</div> -->
+			<!-- 			</div> -->
+		</div>
+	</div>
+</section>
+
+
+<section class="bg-body-tertiary">
+	<div class="container py-9 py-lg-11">
+		<h3 class="text-center mb-2">대기업부터 스타트업까지 함께하는 CodeCove</h3>
+		<br> <br>
+		<div
+			class="swiper-container overflow-hidden position-relative swiper-partners-4 pb-9">
+			<div class="swiper-wrapper d-flex align-items-center">
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/amazon.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/didi.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/deliveroo.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/nasdaq.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/national-geographic.svg"
+						alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/postmates.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/salesforce.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/slack.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/spotify.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/uber.svg" alt="">
+				</div>
+				<div class="swiper-slide">
+					<img class="d-block img-fluid mx-auto px-2 img-invert"
+						src="/resources/assets/img/partners/dark/zillow.svg" alt="">
+				</div>
+			</div>
+			<div class="swiper-pagination swiper-partners-pagination"></div>
+		</div>
+	</div>
+</section>
+
+
+
+<!--begin:Footer-->
+<footer class="bg-dark footer text-white" data-bs-theme="dark">
+	<div class="container px-xl-7 pt-9 pt-lg-11 pb-7">
+		<div class="row">
+			<div class="col-12">
+				<div class="row">
+
+					<div class="col-lg-3 col-md-12 mb-7 mb-lg-0">
+						<div class="position-relative">
+							<!--:Dark Mode:-->
+							<div
+								class="d-inline-flex width-13x align-items-center dropup mt-6">
+								<button
+									class="btn border text-body py-2 px-2 d-flex align-items-center"
+									id="assan-theme" type="button" aria-expanded="false"
+									data-bs-toggle="dropdown" data-bs-display="static">
+									<span class="theme-icon-active d-flex align-items-center">
+										<i class="bx align-middle"></i>
+									</span>
+								</button>
+								<!--:Dark Mode Options:-->
+								<ul class="dropdown-menu dropdown-menu-end"
+									aria-labelledby="assan-theme"
+									style="-bs-dropdown-min-width: 9rem;">
+									<li class="mb-1">
+										<button type="button"
+											class="dropdown-item d-flex align-items-center active"
+											data-bs-theme-value="light">
+											<span class="theme-icon d-flex align-items-center"> <i
+												class="bx bx-sun align-middle me-2"> </i>
+											</span> Light
+										</button>
+									</li>
+									<li class="mb-1">
+										<button type="button"
+											class="dropdown-item d-flex align-items-center"
+											data-bs-theme-value="dark">
+											<span class="theme-icon d-flex align-items-center"> <i
+												class="bx bx-moon align-middle me-2"></i>
+											</span> Dark
+										</button>
+									</li>
+									<li>
+										<button type="button"
+											class="dropdown-item d-flex align-items-center"
+											data-bs-theme-value="auto">
+											<span class="theme-icon d-flex align-items-center"> <i
+												class="bx bx-color-fill align-middle me-2"></i>
+											</span> Auto
+										</button>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-2 col-sm-5 col-md-3 mb-7 mb-md-0">
+						<h6 class="mb-4">Company</h6>
+						<a href="#" class="d-block mb-2 mb-lg-3">Jobs</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Press</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Companies</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Pricing</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Updates</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Community</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Terms</a> <a href="#"
+							class="d-block">Privacy</a>
+					</div>
+					<div class="col-md-4 col-sm-7 col-lg-3 mb-7 mb-md-0">
+						<h6 class="mb-4">Top Categories</h6>
+						<a href="#" class="d-block mb-2 mb-lg-3">Business Management</a> <a
+							href="#" class="d-block mb-2 mb-lg-3">Developers</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Sales & Marketing</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Designer</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Finance</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Data Science</a> <a href="#"
+							class="d-block mb-2 mb-lg-3">Content Creator</a> <a href="#"
+							class="d-block">Legal Adviser</a>
+					</div>
+					<div class="col-lg-4 col-md-5">
+						<h6 class="mb-4">Contact</h6>
+						<div class="mb-2">
+							<a href="tel:+1123456789" class="fs-5 link-hover-underline">+1
+								1234 56789</a>
+						</div>
+						<div>
+							<a href="mailto:hello@domain.com?subject=Hello!"
+								class="fs-5 link-hover-underline">support@domain.com</a>
+						</div>
+						<hr class="my-4 my-sm-5">
+						<h6 class="mb-4">Follow us</h6>
+						<div class="mb-5 d-flex">
+							<!-- Social button -->
+							<a href="#!"
+								class="d-inline-block mb-1 me-2 si rounded-pill si-hover-facebook">
+								<i class="bx bxl-facebook fs-5"></i> <i
+								class="bx bxl-facebook fs-5"></i>
+							</a>
+							<!-- Social button -->
+							<a href="#!"
+								class="d-inline-block mb-1 me-2 si rounded-pill si-hover-twitter">
+								<i class="bx bxl-twitter fs-5"></i> <i
+								class="bx bxl-twitter fs-5"></i>
+							</a>
+							<!-- Social button -->
+							<a href="#!"
+								class="d-inline-block mb-1 me-2 si rounded-pill si-hover-linkedin">
+								<i class="bx bxl-linkedin fs-5"></i> <i
+								class="bx bxl-linkedin fs-5"></i>
+							</a>
+							<!-- Social button -->
+							<a href="#!"
+								class="d-inline-block mb-1 si rounded-pill si-hover-instagram">
+								<i class="bx bxl-instagram fs-5"></i> <i
+								class="bx bxl-instagram fs-5"></i>
+							</a>
+						</div>
+
+						<span class="d-block lh-sm small text-body-secondary">©
+							Copyright <script>
+								document.write(new Date().getFullYear())
+							</script>. Assan
+						</span>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</footer>
+<!--end:Footer-->
+<!-- begin Back to Top button -->
+<a href="#" class="toTop mb-5 me-5"> <i class="bx bxs-up-arrow"></i>
+</a>
+
+<script src="/resources/assets/js/theme.bundle.min.js"></script>
+<script src="/resources/assets/vendor/node_modules/js/prism.js"></script>
+<script src="/resources/assets/vendor/node_modules/js/clipboard.min.js"></script>
+
+<script
+	src="/resources/assets/vendor/node_modules/js/swiper-bundle.min.js"></script>
+<script>
+	var swiperPartners4 = new Swiper(".swiper-partners-4", {
+		slidesPerView : 3,
+		loop : true,
+		spaceBetween : 12,
+		breakpoints : {
+			768 : {
+				slidesPerView : 5
+			}
+		},
+		pagination : {
+			el : ".swiper-partners-pagination",
+			clickable : true
+		},
+		navigation : {
+			nextEl : ".swiper-partners-button-next",
+			prevEl : ".swiper-partners-button-prev"
+		},
+		autoplay : {
+			delay : 1500, // 5초마다 자동 슬라이드
+			disableOnInteraction : false
+		// 슬라이드에 상호작용이 있어도 자동 슬라이드 진행
+		}
+	});
+</script>
+
+
+
+<script>
+	AOS.init();
+</script>

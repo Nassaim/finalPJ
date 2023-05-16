@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.attach.AttatchMapper">
+
+	<insert id="insertAttatch" parameterType="AttatchVO">
+		<selectKey keyProperty="attatchNum,attatchPlace" resultType="AttatchVO" order="BEFORE">
+			SELECT
+				fn_create_num(to_char(sysdate,'yymmdd')
+				, 'TB_ATTATCH'
+				, 'ATTATCH_NUM'
+				, UPPER('ATTA')) AS ATTATCH_NUM 
+				
+				, fn_create_num(to_char(sysdate,'yymmdd')
+				, 'TB_COOFORM'
+				, 'COO_FORM_NUM'
+				, UPPER('COFO')) AS ATTATCH_PLACE
+			FROM 
+				DUAL
+		</selectKey>
+		INSERT INTO TB_ATTATCH
+		(
+		ATTATCH_NUM,
+		ATTATCH_ORDER,
+		ATTATCH_PLACE,
+		FILE_PATH,
+		ORIGIN_NM,
+		SAVE_NM,
+		ATTATCH_TYPE,
+		ATTATCH_SIZE,
+		UPLOADER_ID
+		)
+		VALUES(
+		#{attatchNum},
+		1,
+		#{attatchPlace},
+		#{filePath},
+		#{originNm},
+		#{saveNm},
+		#{attatchType},
+		#{attatchSize},
+		#{uploaderId}
+		)
+	</insert>
+	
+	<insert id="insertReplyAttatch" parameterType="AttatchVO">
+	<selectKey keyProperty="attatchNum,attatchPlace"
+			resultType="AttatchVO" order="BEFORE">
+			SELECT
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) AS ATTATCH_NUM ,
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_WORK_REPLY', 'WO_REPLY_NUM', UPPER('WORE')) AS ATTATCH_PLACE
+			FROM DUAL
+		</selectKey>
+		INSERT INTO TB_ATTATCH
+		(
+		ATTATCH_NUM,
+		ATTATCH_ORDER,
+		ATTATCH_PLACE,
+		FILE_PATH,
+		ORIGIN_NM,
+		SAVE_NM,
+		ATTATCH_TYPE,
+		ATTATCH_SIZE,
+		UPLOADER_ID
+		)
+		VALUES(
+		#{attatchNum},
+		1,
+		#{attatchPlace},
+		#{filePath},
+		#{originNm},
+		#{saveNm},
+		#{attatchType},
+		#{attatchSize},
+		#{uploaderId}
+		)
+	</insert>
+	
+	<insert id="createAttachNumReplyAttatch" parameterType="AttatchVO">
+	<selectKey keyProperty="attatchNum"
+			resultType="AttatchVO" order="BEFORE">
+			SELECT
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_ATTATCH', 'ATTATCH_NUM',
+			UPPER('ATTA')) AS ATTATCH_NUM 
+			FROM DUAL
+			
+		</selectKey>
+		INSERT INTO TB_ATTATCH
+		(
+		ATTATCH_NUM,
+		ATTATCH_ORDER,
+		ATTATCH_PLACE,
+		FILE_PATH,
+		ORIGIN_NM,
+		SAVE_NM,
+		ATTATCH_TYPE,
+		ATTATCH_SIZE,
+		UPLOADER_ID
+		)
+		VALUES(
+		#{attatchNum},
+		1,
+		#{attatchPlace},
+		#{filePath},
+		#{originNm},
+		#{saveNm},
+		#{attatchType},
+		#{attatchSize},
+		#{uploaderId}
+		)
+	</insert>
+
+
+	<select id="findAttachNum" parameterType="String" resultType="String">
+	SELECT ATTATCH_NUM
+	FROM TB_ATTATCH
+	WHERE ATTATCH_PLACE =#{parentWoReplyNum}
+	</select>
+	
+	<insert id="insertIssueReplyAttatch" parameterType="AttatchVO">
+	<selectKey keyProperty="attatchNum,attatchPlace"
+			resultType="AttatchVO" order="BEFORE">
+			SELECT
+			fn_create_num(to_char(sysdate,'yymmdd'), 'TB_ATTATCH', 'ATTATCH_NUM',
+			UPPER('ATTA')) AS ATTATCH_NUM ,
+				fn_create_num(to_char(sysdate,'yymmdd'), 'TB_ISSUE_REPLY',
+			'ISSUE_REPLY_NUM', UPPER('ISRE')) AS ATTATCH_PLACE
+			FROM DUAL
+		</selectKey>
+		INSERT INTO TB_ATTATCH
+		(
+		ATTATCH_NUM,
+		ATTATCH_ORDER,
+		ATTATCH_PLACE,
+		FILE_PATH,
+		ORIGIN_NM,
+		SAVE_NM,
+		ATTATCH_TYPE,
+		ATTATCH_SIZE,
+		UPLOADER_ID
+		)
+		VALUES(
+		#{attatchNum},
+		1,
+		#{attatchPlace},
+		#{filePath},
+		#{originNm},
+		#{saveNm},
+		#{attatchType},
+		#{attatchSize},
+		#{uploaderId}
+		)
+	</insert>
+	
+	<update id="modifyIssueReplyAttatch" parameterType="AttatchVO">
+		UPDATE TB_ATTATCH
+		SET
+		FILE_PATH=#{filePath},
+		ORIGIN_NM=#{originNm},
+		SAVE_NM=#{saveNm},
+		ATTATCH_TYPE=#{attatchType},
+		ATTATCH_SIZE=#{attatchSize}
+        WHERE ATTATCH_NUM=#{attatchNum}
+	</update>
+	
+	<select id="createFolderNum" resultType="AttatchVO">
+		SELECT
+		fn_create_num(to_char(sysdate,'yymmdd'), 'TB_ATTATCH', 'ATTATCH_NUM',
+		UPPER('ATTA')) AS ATTATCH_NUM ,
+		fn_create_num(to_char(sysdate,'yymmdd'), 'TB_WFOLDER_FILE',
+		'WFOLDER_FILE_NUM', UPPER('WFFL')) AS ATTATCH_PLACE
+		FROM DUAL
+	</select>
+
+	<insert id="insertFolderAttatch" parameterType="AttatchVO">
+		INSERT INTO TB_ATTATCH
+		(
+		ATTATCH_NUM,
+		ATTATCH_ORDER,
+		ATTATCH_PLACE,
+		FILE_PATH,
+		ORIGIN_NM,
+		SAVE_NM,
+		ATTATCH_TYPE,
+		ATTATCH_SIZE,
+		UPLOADER_ID
+		)
+		VALUES(
+		#{attatchNum},
+		#{attatchOrder},
+		#{attatchPlace},
+		#{filePath},
+		#{originNm},
+		#{saveNm},
+		#{attatchType},
+		#{attatchSize},
+		#{uploaderId}
+		)
+	</insert>
+	
+	
+
+	<select id="selectDownload" parameterType="String"
+		resultType="AttatchVO">
+		SELECT *
+		FROM TB_ATTATCH
+		WHERE ATTATCH_NUM = #{attatchNum}
+	</select>
+
+	<select id="selectAttatchFile" parameterType="AttatchVO"
+		resultType="AttatchVO">
+		SELECT *
+		FROM TB_ATTATCH
+		WHERE ATTATCH_NUM = #{attatchNum}
+		AND ATTATCH_ORDER = #{attatchOrder}
+		AND ATTATCH_PLACE = #{attatchPlace}
+	</select>
+	
+	<select id="selectAttatchFileList"
+	parameterType="AttatchVO"
+		resultType="AttatchVO" >
+		SELECT *
+		FROM TB_ATTATCH
+		WHERE ATTATCH_NUM = #{attatchNum}
+		AND ATTATCH_PLACE = #{attatchPlace}
+		</select>
+
+	<delete id="deleteAttatchFile" parameterType="AttatchVO">
+		DELETE FROM
+		TB_ATTATCH
+		WHERE ATTATCH_NUM = #{attatchNum}
+	</delete>
+	
+	<delete id="deleteAttatchReplaceFile" parameterType="AttatchVO">
+		DELETE FROM
+		TB_ATTATCH
+		WHERE ATTATCH_PLACE = #{attatchPlace}
+	</delete>
+	
+	<update id="updateAttatch" parameterType="AttatchVO">
+		UPDATE TB_ATTATCH
+		SET DOWN_COUNT = DOWN_COUNT + 1
+		WHERE ATTATCH_NUM = #{attatchNum}
+		AND ATTATCH_ORDER = #{attatchOrder}
+	</update>
+
+	<select id="multiDownload" parameterType="AttatchVO"
+		resultType="AttatchVO">
+		SELECT *
+		FROM TB_ATTATCH
+		WHERE ATTATCH_NUM = #{attatchNum}
+		AND ATTATCH_ORDER = #{attatchOrder}
+	</select>
+
+	<insert parameterType="MyBlogPostVO" id="insertBlogAttatches">
+		<selectKey keyProperty="attatchNum,postNum"
+			resultType="MyBlogPostVO" order="BEFORE">
+			<if test="postNum = null and postNum = ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_BLOG_POST', 'POST_NUM', UPPER('BLPO'))	FROM DUAL) AS POST_NUM
+				FROM DUAL
+			</if>
+			<if test="postNum != null and postNum != ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT POST_NUM FROM TB_BLOG_POST WHERE POST_NUM=#{postNum}) AS POST_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+			ATTATCH_NUM
+			, ATTATCH_ORDER
+			, ATTATCH_PLACE
+			, FILE_PATH
+			, ORIGIN_NM
+			, SAVE_NM
+			, ATTATCH_TYPE
+			, ATTATCH_SIZE
+			, UPLOADER_ID
+			) VALUES (
+			#{attatchNum}
+			, #{idx}
+			, #{postNum}
+			, #{attatch.filePath}
+			, #{attatch.originNm}
+			, #{attatch.saveNm}
+			, #{attatch.attatchType}
+			, #{attatch.attatchSize}
+			, #{bloggerId})
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+
+	<insert parameterType="ExpertProdVO" id="templateInsertAttatch">
+		<selectKey keyProperty="attatchNum,eprodNum"
+			resultType="ExpertProdVO" order="BEFORE">
+			<if test="eprodNum = null and eprodNum = ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_EXP_PROD', 'EPROD_NUM', UPPER('slpo'))	FROM DUAL) AS EPROD_NUM
+				FROM DUAL
+			</if>
+			<if test="eprodNum != null and eprodNum != ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT EPROD_NUM FROM TB_EXP_PROD WHERE EPROD_NUM=#{eprodNum}) AS EPROD_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+			ATTATCH_NUM
+			, ATTATCH_ORDER
+			, ATTATCH_PLACE
+			, FILE_PATH
+			, ORIGIN_NM
+			, SAVE_NM
+			, ATTATCH_TYPE
+			, ATTATCH_SIZE
+			, UPLOADER_ID		
+	
+			
+			) VALUES (
+			#{attatchNum}
+			, #{idx}
+			, #{eprodNum}
+			, #{attatch.filePath}
+			, #{attatch.originNm}
+			, #{attatch.saveNm}
+			, #{attatch.attatchType}
+			, #{attatch.attatchSize}
+			, #{memId}
+
+			)
+				
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	
+	<insert parameterType="ExpertVO" id="mentorInsertAttatch">
+		<selectKey keyProperty="attatchNum,expFormNum"
+			resultType="ExpertVO" order="BEFORE">
+			<if test="expFormNum = null and expFormNum = ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_EXP_FORM', 'EXP_FORM_NUM', UPPER('EXPE'))	FROM DUAL) AS EXP_FORM_NUM
+				FROM DUAL
+			</if>
+			<if test="expFormNum != null and expFormNum != ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT EXP_FORM_NUM FROM TB_EXP_FORM WHERE EXP_FORM_NUM=#{expFormNum}) AS EXP_FORM_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+			ATTATCH_NUM
+			, ATTATCH_ORDER
+			, ATTATCH_PLACE
+			, FILE_PATH
+			, ORIGIN_NM
+			, SAVE_NM
+			, ATTATCH_TYPE
+			, ATTATCH_SIZE
+			, UPLOADER_ID		
+	
+			
+			) VALUES (
+			#{attatchNum}
+			, #{idx}
+			, #{expFormNum}
+			, #{attatch.filePath}
+			, #{attatch.originNm}
+			, #{attatch.saveNm}
+			, #{attatch.attatchType}
+			, #{attatch.attatchSize}
+			, #{memId}
+
+			)
+				
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	<insert parameterType="WorkVO" id="workInsertAttatch">
+		<selectKey keyProperty="attatchNum,workNum"
+			resultType="WorkVO" order="BEFORE">
+			<if test="workNum = null and workNum = ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_WORK', 'WORK_NUM', UPPER('WORK'))	FROM DUAL) AS WORK_NUM
+				FROM DUAL
+			</if>
+			<if test="workNum != null and workNum != ''">
+				SELECT
+				(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+				(SELECT WORK_NUM FROM TB_WORK WHERE WORK_NUM=#{workNum}) AS WORK_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+			ATTATCH_NUM
+			, ATTATCH_ORDER
+			, ATTATCH_PLACE
+			, FILE_PATH
+			, ORIGIN_NM
+			, SAVE_NM
+			, ATTATCH_TYPE
+			, ATTATCH_SIZE
+			, UPLOADER_ID		
+			
+			) VALUES (
+			#{attatchNum}
+			, #{idx}
+			, #{workNum}
+			, #{attatch.filePath}
+			, #{attatch.originNm}
+			, #{attatch.saveNm}
+			, #{attatch.attatchType}
+			, #{attatch.attatchSize}
+			, #{memId}
+
+			)
+				
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	<delete id="workFileDelete" parameterType="AttatchVO">
+		DELETE FROM
+		TB_ATTATCH
+		WHERE ATTATCH_ORDER = #{attatchOrder}
+		and ATTATCH_PLACE = #{attatchPlace}
+	</delete>
+
+	<delete id="cooFormFileDelete" parameterType="String">
+		DELETE FROM
+		TB_ATTATCH
+		WHERE ATTATCH_PLACE = #{cooFormNum}
+	</delete>
+
+	<delete id="workFileAllDelete" parameterType="String">
+		DELETE FROM
+		TB_ATTATCH
+		WHERE ATTATCH_PLACE = #{workNum}
+	</delete>
+
+	<select id="selectAttatchNum" parameterType="String" resultType="AttatchVO">
+		SELECT DISTINCT
+		ATTATCH_NUM
+		FROM TB_ATTATCH
+		WHERE ATTATCH_PLACE = #{attatchPlace}
+	</select>
+
+
+	<!-- insertQnAAttatches -->
+	<insert parameterType="kr.or.ddit.mainpage.vo.QnAVO" id="insertQnAAttatches">
+		<selectKey keyProperty="attatchNum,qnaNum" resultType="kr.or.ddit.mainpage.vo.QnAVO" order="BEFORE">
+			<if test="qnaNum = null and qnaNum = ''">
+				SELECT
+                	(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+                	(SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_QNA', 'QNA_NUM', UPPER('QNAA')) FROM DUAL) AS QNA_NUM
+				FROM DUAL
+			</if>
+			<if test="qnaNum != null and qnaNum != ''">
+				SELECT
+                    (SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+                    (SELECT QNA_NUM FROM TB_QNA WHERE QNA_NUM=#{qnaNum}) AS QNA_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+                ATTATCH_NUM
+                , ATTATCH_ORDER
+                , ATTATCH_PLACE
+                , FILE_PATH
+                , ORIGIN_NM
+                , SAVE_NM
+                , ATTATCH_TYPE
+                , ATTATCH_SIZE
+                , UPLOADER_ID		
+			) VALUES (
+				#{attatchNum}
+                , #{idx}
+				, #{qnaNum}
+				, #{attatch.filePath}
+				, #{attatch.originNm}
+				, #{attatch.saveNm}
+				, #{attatch.attatchType}
+				, #{attatch.attatchSize}
+				, #{writerId}
+			)
+		</foreach>
+		SELECT 
+            * 
+        FROM
+        	DUAL
+	</insert>
+	
+	<!-- insertNoticeAttatches -->
+	<insert parameterType="kr.or.ddit.mainpage.vo.NoticeVO" id="insertNoticeAttatches">
+		<selectKey keyProperty="attatchNum,notiNum" resultType="kr.or.ddit.mainpage.vo.NoticeVO" order="BEFORE">
+			<if test="notiNum = null and notiNum = ''">
+				SELECT
+                	(SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+                	(SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_NOTICE', 'NOTI_NUM', UPPER('NOTI')) FROM DUAL) AS NOTI_NUM
+				FROM DUAL
+			</if>
+			<if test="notiNum != null and notiNum != ''">
+				SELECT
+                    (SELECT	FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM, 
+                    (SELECT NOTI_NUM FROM TB_NOTICE WHERE NOTI_NUM=#{notiNum}) AS NOTI_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+                ATTATCH_NUM
+                , ATTATCH_ORDER
+                , ATTATCH_PLACE
+                , FILE_PATH
+                , ORIGIN_NM
+                , SAVE_NM
+                , ATTATCH_TYPE
+                , ATTATCH_SIZE
+                , UPLOADER_ID		
+			) VALUES (
+				#{attatchNum}
+                , #{idx}
+				, #{notiNum}
+				, #{attatch.filePath}
+				, #{attatch.originNm}
+				, #{attatch.saveNm}
+				, #{attatch.attatchType}
+				, #{attatch.attatchSize}
+				, #{writerId}
+			)
+		</foreach>
+		SELECT 
+            * 
+        FROM
+        	DUAL
+	</insert>
+
+	<!-- freeBoardAttatch -->
+	<insert parameterType="FreeBoardVO"
+		id="insertFreeBoardAttatches">
+		<selectKey keyProperty="attatchNum,freeNum"
+			resultType="FreeBoardVO" order="BEFORE">
+			<if test="@org.apache.commons.lang3.StringUtils@isBlank(freeNum)">
+				SELECT
+				(SELECT
+				FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA'))
+				FROM DUAL) AS ATTATCH_NUM
+				, (SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_FREEBOARD',
+				'FREE_NUM', UPPER('FREE'))
+				FROM DUAL) AS FREE_NUM
+				FROM DUAL
+			</if>
+			<if
+				test="@org.apache.commons.lang3.StringUtils@isNotBlank(freeNum)">
+				SELECT
+				(SELECT
+				FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA'))
+				FROM DUAL) AS ATTATCH_NUM
+				, (SELECT FREE_NUM FROM TB_FREEBOARD WHERE FREE_NUM=#{freeNum}) AS
+				FREE_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+			ATTATCH_NUM
+			, ATTATCH_ORDER
+			, ATTATCH_PLACE
+			, FILE_PATH
+			, ORIGIN_NM
+			, SAVE_NM
+			, ATTATCH_TYPE
+			, ATTATCH_SIZE
+			, UPLOADER_ID
+			) VALUES (
+			#{attatchNum}
+			, #{idx}
+			, #{freeNum}
+			,
+			#{attatch.filePath,jdbcType=VARCHAR}
+			,
+			#{attatch.originNm,jdbcType=VARCHAR}
+			,
+			#{attatch.saveNm,jdbcType=VARCHAR}
+			,
+			#{attatch.attatchType,jdbcType=VARCHAR}
+			, #{attatch.attatchSize,jdbcType=NUMERIC}
+			, #{writerId,jdbcType=VARCHAR})
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	<!-- freeBoardAttatch -->
+	
+	<!-- cooBoardAttatch -->
+	<insert parameterType="CooBoardVO"
+		id="insertCooBoardAttatches">
+		<selectKey keyProperty="attatchNum,cooNm"
+			resultType="CooBoardVO" order="BEFORE">
+			<if test="@org.apache.commons.lang3.StringUtils@isBlank(cooNm)">
+				SELECT
+				  (SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA'))FROM DUAL) AS ATTATCH_NUM
+				, (SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_COOBOARD','COO_NM', UPPER('COBO'))FROM DUAL) AS COO_NM
+				FROM DUAL
+			</if>
+			<if
+				test="@org.apache.commons.lang3.StringUtils@isNotBlank(cooNm)">
+				SELECT
+				(SELECT
+				FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA'))
+				FROM DUAL) AS ATTATCH_NUM
+				, (SELECT COO_NM FROM TB_COOBOARD WHERE COO_NM=#{cooNm}) AS COO_NM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH (
+			ATTATCH_NUM
+			, ATTATCH_ORDER
+			, ATTATCH_PLACE
+			, FILE_PATH
+			, ORIGIN_NM
+			, SAVE_NM
+			, ATTATCH_TYPE
+			, ATTATCH_SIZE
+			, UPLOADER_ID
+			) VALUES (
+			#{attatchNum}
+			, #{idx}
+			, #{cooNm}
+			,
+			#{attatch.filePath,jdbcType=VARCHAR}
+			,
+			#{attatch.originNm,jdbcType=VARCHAR}
+			,
+			#{attatch.saveNm,jdbcType=VARCHAR}
+			,
+			#{attatch.attatchType,jdbcType=VARCHAR}
+			, #{attatch.attatchSize,jdbcType=NUMERIC}
+			, #{writerId,jdbcType=VARCHAR})
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	
+	<!-- cooApplyFormAttatch 협업신청 첨부파일 -->
+	<insert parameterType="cooFormVO" id="insertCooApplyAttatches">
+		<selectKey keyProperty="attatchNum,cooFormNum" resultType="cooFormVO" order="BEFORE">
+			<if test="@org.apache.commons.lang3.StringUtils@isBlank(cooFormNum)">
+				SELECT
+				  	  (SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_ATTATCH', 'ATTATCH_NUM', UPPER('ATTA'))FROM DUAL) AS ATTATCH_NUM
+					, (SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'), 'TB_COOFORM','COO_FORM_NUM', UPPER('COFO'))FROM DUAL) AS COO_FORM_NUM
+				FROM DUAL
+			</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(cooFormNum)">
+				SELECT
+					 (SELECT FN_CREATE_NUM(TO_CHAR(SYSDATE,'YYMMDD'),'TB_ATTATCH','ATTATCH_NUM', UPPER('ATTA')) FROM DUAL) AS ATTATCH_NUM
+					,(SELECT COO_FORM_NUM FROM TB_COOFORM WHERE COO_FORM_NUM=#{cooFormNum}) AS COO_FORM_NUM
+				FROM DUAL
+			</if>
+		</selectKey>
+		INSERT ALL
+		<foreach index="idx" item="attatch" collection="attatchList">
+			INTO TB_ATTATCH
+				(
+					ATTATCH_NUM,
+					ATTATCH_ORDER,
+					ATTATCH_PLACE,
+					FILE_PATH,
+					ORIGIN_NM,
+					SAVE_NM,
+					ATTATCH_TYPE,
+					ATTATCH_SIZE,
+					UPLOADER_ID
+				)
+			VALUES(
+			  #{attatchNum}
+			, #{idx}
+			, #{cooFormNum}
+			, #{attatch.filePath, jdbcType=VARCHAR}
+			, #{attatch.originNm, jdbcType=VARCHAR}
+			, #{attatch.saveNm, jdbcType=VARCHAR}
+			, #{attatch.attatchType, jdbcType=VARCHAR}
+			, #{attatch.attatchSize, jdbcType=NUMERIC}
+			, #{applicantId, jdbcType=VARCHAR}
+			)
+		</foreach>
+		SELECT 
+			* 
+		FROM 
+			DUAL
+	</insert>
+	
+	<select id="selectAttatch" parameterType="AttatchVO" resultType="AttatchVO">
+		SELECT *
+		  FROM TB_ATTATCH
+		 WHERE ATTATCH_PLACE = #{attatchPlace}
+	</select>
+</mapper>

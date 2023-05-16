@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+	
+	
+	<context:annotation-config/> <!-- 어노테이션 설정을 가능하게 해줌! -->
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" 	destroy-method="close">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@112.220.114.130:1521:xe" />
+		<property name="username" value="team4_202210F" />
+		<property name="password" value="java" />
+	</bean>
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:/sqlmap/**/*_SQL.xml" />
+		<property name="configLocation" value="/WEB-INF/mybatisAlias/mybatisAlias.xml" />
+	</bean>
+
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="kr.or.ddit.mapper.**" />
+	</bean>
+	
+	<!-- uploadPath -->
+	<bean id="uploadPath" class="java.lang.String">
+		<constructor-arg value="D:/A_TeachingMaterial/09_FinalPoject/codecove/workspace/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/CodeCoveProject/resources" />
+	</bean>
+	
+	<util:properties location="classpath:appInfo.properties" id="appInfo"/>
+		
+</beans>

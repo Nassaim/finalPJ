@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.mainpage.MainpageMapper">
+	
+	<select id="cobolist" resultType="CooBoardVO">
+		select 
+            coo_nm
+            , a.writer_id
+            , a.coo_title
+            , a.coo_content
+            , a.coo_people_num
+            , to_char(a.coo_start_date, 'yy-mm-dd') coo_start_date
+            , to_char(a.coo_end_date, 'yy-mm-dd') coo_end_date
+            , a.coo_done_yn
+            , a.view_num
+            , to_char(a.coo_date, 'yy-mm-dd') coo_date
+            , b.mem_nick
+            from  tb_cooboard a
+            left outer join tb_member b on(a.writer_id=b.mem_id)
+            ORDER BY
+            a.coo_date DESC
+	</select>
+	
+</mapper>

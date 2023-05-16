@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.project.JProjectMapper">
+
+	<resultMap type="WorkVO" id="WorkMap">
+		<id property="workNum" column="WORK_NUM"/>
+		<result property="pjId" column="PJ_ID"/>
+		<result property="workReq" column="WORK_REQ"/>
+		<result property="workTitle" column="WORK_TITLE"/>
+		<result property="workContent" column="WORK_CONTENT"/>
+		<result property="workStatusCode" column="WORK_STATUS_CODE"/>
+		<result property="workStartDate" column="WORK_START_DATE"/>
+		<result property="workEndDate" column="WORK_END_DATE"/>
+		<result property="workPriority" column="WORK_PRIORITY"/>
+		<result property="workProgress" column="WORK_PROGRESS"/>
+		<result property="parentWorkNum" column="PARENT_WORK_NUM"/>
+		<result property="workColor" column="WORK_COLOR"/>
+		<result property="workCreateDate " column="WORK_CREATE_DATE"/>
+		<collection property="attatchList" resultMap="attatchMap"></collection>
+	</resultMap>
+
+	<resultMap type="AttatchVO" id="attatchMap">
+		<result property="attatchNum" column="ATTATCH_NUM"/>
+		<result property="attatchOrder" column="ATTATCH_ORDER"/>
+		<result property="attatchPlace" column="ATTATCH_PLACE"/>
+		<result property="filePath" column="FILE_PATH"/>
+		<result property="originNm" column="ORIGIN_NM"/>
+		<result property="saveNm" column="SAVE_NM"/>
+		<result property="attatchType" column="ATTATCH_TYPE"/>
+		<result property="attatchSize" column="ATTATCH_SIZE"/>
+		<result property="downNumber" column="DOWN_COUNT"/>
+		<result property="attatchDate" column="ATTATCH_DATE"/>
+		<result property="uploaderId" column="UPLOADER_ID"/>
+	</resultMap>	
+	
+<!-- 	 work내에 있는 파일 출력 -->
+	<select id="downloadList" parameterType="String" resultMap="WorkMap">
+		SELECT 
+			A.WORK_NUM, 
+			A.WORK_TITLE, 
+			C.SAVE_NM,
+			C.ATTATCH_TYPE,
+            c.origin_nm
+		FROM 
+			TB_WORK A
+		INNER JOIN 
+			TB_ATTATCH C 
+		ON A.WORK_NUM = C.ATTATCH_PLACE
+		WHERE A.WORK_NUM = #{workNum}
+	
+	</select>
+	
+	
+	<!-- 프로젝트 전체 리스트 -->
+	<select id="projectAllList" parameterType="String" resultType="ProjectVO">
+		SELECT 
+		  a.PJ_ID, 
+		  a.PJ_NAME, 
+		  a.PJ_START_DATE, 
+		  a.PJ_END_DATE, 
+		  b.MEM_ID 
+		FROM 
+		  TB_PROJECT a 
+		  INNER JOIN TB_COLLEAGUE b ON a.PJ_ID = b.PJ_ID
+		WHERE 
+		  b.MEM_ID = #{memId}     
+	</select>
+	
+	<!-- 프로젝트 안에 있는 워크리스트 -->
+	<select id="repoWorkList" parameterType="String" resultType="WorkVO">
+		SELECT 
+			WORK_NUM,
+			WORK_TITLE
+		FROM TB_WORK
+		WHERE PJ_ID = #{pjId}
+	</select>
+
+
+
+	<!-- 4.work안에 있는 모든 내 업무 모아보기 -->
+	
+	<select id="workAllList" parameterType="String" resultType="WorkVO">
+		SELECT 
+		  p.PJ_NAME,
+		  w.WORK_TITLE,
+		  CASE 
+		    WHEN w.WORK_STATUS_CODE = 'WKST01' THEN '요청'
+		    WHEN w.WORK_STATUS_CODE = 'WKST02' THEN '진행'
+		    WHEN w.WORK_STATUS_CODE = 'WKST03' THEN '피드백'
+		    WHEN w.WORK_STATUS_CODE = 'WKST04' THEN '완료'
+		    WHEN w.WORK_STATUS_CODE = 'WKST05' THEN '보류'
+		    ELSE w.WORK_STATUS_CODE
+		  END AS WORK_STATUS_CODE,
+		  CASE 
+		    WHEN w.WORK_PRIORITY = 'WKPR01' THEN '낮음'
+		    WHEN w.WORK_PRIORITY = 'WKPR02' THEN '보통'
+		    WHEN w.WORK_PRIORITY = 'WKPR03' THEN '높음'
+		    WHEN w.WORK_PRIORITY = 'WKPR04' THEN '긴급'
+		    ELSE w.WORK_PRIORITY
+		  END AS WORK_PRIORITY,
+		  w.WORK_PROGRESS,
+		  w.WORK_START_DATE,
+		  w.WORK_END_DATE
+		FROM 
+		  TB_COLLEAGUE c
+		  JOIN TB_PROJECT p ON c.PJ_ID = p.PJ_ID
+		  JOIN TB_WORK w ON c.PJ_ID = w.PJ_ID
+		WHERE 
+		  c.MEM_ID = #{memId}  
+		ORDER BY 
+		  w.WORK_PRIORITY DESC, 
+		  CASE 
+		    WHEN w.WORK_STATUS_CODE = 'WKST04' THEN 1 
+		    ELSE 0 
+		  END,
+		  w.WORK_END_DATE ASC
+	</select>
+	
+
+
+
+
+</mapper>

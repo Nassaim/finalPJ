@@ -1,0 +1,540 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<style>
+.form_radio_btn {
+	width: 47%;
+	height : 45px;
+	border: 1px solid #EAE7E7;
+	border-radius: 10px;
+}
+.form_radio_btn input[type=radio] {
+	display: none;
+}
+.form_radio_btn label {
+	display: block;
+	border-radius: 10px;
+	margin: 0 auto;
+	text-align: center;
+	height: -webkit-fill-available;
+	line-height: 45px;
+}
+ 
+/* Checked */
+ 
+.form_radio_btn input[type=radio]:checked + label {
+ 	background: #00c7ae;
+	color: #fff;
+}
+/* Hover */
+.form_radio_btn label:hover {
+	color: #666;
+}
+ 
+/* Disabled */
+.form_radio_btn input[type=radio] + label {
+	background: #F9FAFC;
+	color: #666;
+}
+</style>
+	<div class="d-flex flex-column flex-root">
+		<div>
+			<main>
+				<!--//Page Toolbar//-->
+				<div class="toolbar px-3 px-lg-6 py-3">
+					<div class="position-relative container-fluid px-0">
+						<div class="row align-items-center position-relative">
+							<div class="col-md-8 mb-4 mb-md-0">
+								<h3 class="mb-2">모아보기 - 전체업무</h3>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="content pt-3 px-3 px-lg-6 d-flex flex-column-fluid">
+					<div class="container-fluid px-0">
+						<div class="row">
+							<div class="col-12 mb-3 mb-lg-5">
+							<div class="overflow-hidden card table-nowrap table-card">
+<!-- 								<div class="card"> -->
+									<div class="table-responsive">
+										<table id="datatable"
+										class="table mt-0 table-striped table-card table-nowrap">
+											<c:choose>
+												<c:when test="${empty workList}">
+													<tr>
+														<td colspan="4">조회하실 게시물이 존재하지 않습니다.</td>
+													</tr>
+												</c:when>
+												<c:otherwise>
+													<thead class="text-uppercase small text-body-secondary">
+														<tr>
+															<th onclick="sortTable(0)" style="width:15%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">프로젝트제목</th>
+															<th onclick="sortTable(1)" style="width:15%">업무제목</th>
+															<th style="text-align:center; width:7%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" onclick="sortTable(2)">상태코드</th>
+															<th style="text-align:center; width:7%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" onclick="sortTable(3)">우선순위</th>
+															<th style="text-align:center; width:20%" onclick="sortTable(4)">진척도</th>
+															<th style="text-align:center; width:10%" onclick="sortTable(5)">시작일</th>
+															<th style="text-align:center; width:10%" onclick="sortTable(6)">종료일</th>
+															<th style="width:4%" class="text-end"></th>
+														</tr>
+													</thead>
+													<c:forEach items="${workList}" var="workList">
+														<tr>
+															<td>
+																<div class="d-flex align-items-center" data-tippy-content="${workList.pjName }">
+									                            	<div class="h6 mb-0 lh-1"  style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${workList.pjName}</div>
+									                            </div>
+															</td>
+															<td>
+																<div class="d-flex align-items-center" data-tippy-content="${workList.workTitle }">
+									                            	<div class="h6 mb-0 lh-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${workList.workTitle }</div>
+									                            </div>
+															</td>
+															<c:forEach items="${statCode }" var="statCode">
+																<c:if test="${workList.workStatusCode eq statCode.comCode }">
+																	<td style="text-align:center;"><span class="d-inline-block align-middle">${statCode.comCodeNm }</span></td>
+																</c:if>
+															</c:forEach>
+															<c:forEach items="${priCode }" var="priCode">
+							                             		<c:if test="${workList.workPriority eq priCode.comCode }">
+								                            	<td style="text-align:center;"><span class="d-inline-block align-middle">${priCode.comCodeNm }</span></td>
+								                            	</c:if>
+							                                </c:forEach>
+															<td>
+																<div class="progress" style="height: 15px; width:100%; float:left">
+												                     <div class="progress-bar" role="progressbar"
+												                      aria-valuemin="0" aria-valuemax="100" style="width: ${workList.workProgress }%"></div>
+												                   	 </div>
+<%-- 													                <div style="float:left; margin-left:10px;">${workList.workProgress }%</div> --%>
+															</td>
+															<c:set value="${workList.workStartDate}" var="workStartDate"></c:set>
+															<fmt:parseDate value="${workStartDate}" pattern="yyyy-MM-dd" var="workStartDate"></fmt:parseDate>
+															<fmt:formatDate value="${workStartDate}" pattern="yyyy-MM-dd" var="workStartDate"/>
+															<td style="text-align:center;">${workStartDate}</td>
+															<c:set value="${workList.workEndDate}" var="workEndDate"></c:set>
+															<fmt:parseDate value="${workEndDate}" pattern="yyyy-MM-dd" var="workEndDate"></fmt:parseDate>
+															<fmt:formatDate value="${workEndDate}" pattern="yyyy-MM-dd" var="workEndDate"/>
+															<td style="text-align:center;">${workEndDate}</td>
+															<td>
+															<div class="d-flex justify-content-end align-items-center">
+			                                                    <button type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling${workList.workNum }" aria-controls="offcanvasScrolling"
+			                                                    style="background-color:white; border:0px;">
+			                                                        <span class="material-symbols-rounded align-middle fs-5 text-body">visibility</span>
+			                                                    </button>
+		                                                	</div>
+		                                                	
+		                                                	<div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling${workList.workNum }" aria-labelledby="offcanvasScrollingLabel"
+				                                            style="background-color:white; width:45%;">
+				                                              <div class="offcanvas-header">
+				                                                <h5 class="offcanvas-title" id="offcanvasScrollingLabel">${workList.myProjectVO.pjName }</h5>
+				                                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+				                                              </div>
+		                                                	
+		                                                	<!-- 사이드캔버스 바디 -->
+				                                              <div class="offcanvas-body">
+				                                              <c:forEach items="${workList.colleagueVOList }" var="coll" >
+		                                            		  	<c:if test="${coll.memId == workList.workReq }">
+				                                              	
+				                                              	<div class="d-flex justify-content-start align-items-center mb-3">
+		                                                        <span
+		                                                            class="avatar flex-shrink-0 rounded-circle d-inline-block">
+		                                                            <img src="${coll.memProfile }" alt="avatar"
+		                                                                class="img-fluid rounded-circle">
+		                                                        
+		                                                        </span>
+		                                                        <div class="ps-3" style="margin-right: auto;">
+		                                                            <h6 class="mb-0">${coll.memNick }</h6>
+		                                                            <small class="text-body-subtle">${workList.workCreateDate }</small>
+		                                                        </div>
+		                                                        
+														         <div class="dropdown" class="ps-3" style="float:left;">
+														           <a href="#" class="btn p-0 text-body border-0 shadow-none size-35 d-flex align-items-center justify-content-center rounded-pill" role="button" data-bs-toggle="dropdown"
+														             aria-haspopup="true" aria-expanded="false">
+														             <span class="material-symbols-rounded align-middle">
+														               more_vert
+														               </span>
+														           </a>
+														           <div class="dropdown-menu mt-1 dropdown-menu-end">
+														             <button type="button" class="dropdown-item" data-bs-toggle="modal"
+		                                                				data-bs-target="#wtUpdateWorkModal${workList.workNum }">업무 수정
+														             </button>
+														             
+			                                                        <c:choose>
+			                                                        <c:when test="${loginId == workList.workReq }">
+														             	<form action="/coco/work/delete" method="post">
+																			<input type="hidden" name="pjId" value="${workList.myProjectVO.pjId}">
+																			<input type="hidden" name="workNum" value="${workList.workNum}">
+														             		<button type="submit" class="dropdown-item" 
+														             		onclick="return confirm('삭제하시겠습니까?')">업무 삭제</button>
+																		</form>
+			                                                        </c:when>
+			                                                        <c:when test="${loginId == workList.myProjectVO.pjAdminId }">
+														             	<form action="/coco/work/delete" method="post">
+																			<input type="hidden" name="pjId" value="${project.pjId}">
+																			<input type="hidden" name="workNum" value="${work.workNum}">
+														             		<button type="submit" class="dropdown-item" 
+														             		onclick="return confirm('삭제하시겠습니까?')">업무 삭제</button>
+																		</form>
+			                                                        </c:when>
+			                                                        </c:choose>
+														             
+														           </div>
+														         </div>
+		                                                   		 </div>
+		                                                   		 
+		                                                   		 <br>
+			                                                    <p>${workList.workTitle }</p>
+			                                                    <hr style="border: 1px solid gray">
+		
+			                                                    <div class="col-12 col-md-12 mb-3">
+															        <div class="form-group">
+																		<div class="form_toggle row-vh d-flex flex-row justify-content-between" >
+															        	<span class="material-symbols-rounded" style="margin-right: 10px; margin-top:10px;">update</span>
+																			<div class="form_radio_btn radio">
+																				<input id="wtRadio1${workList.workNum }" class="" type="radio" name="wtWorkStatusCode${workList.workNum }r" value="WKST01" <c:if test="${workList.workStatusCode eq 'WKST01' }">checked</c:if>>
+																				<label for="wtRadio1${workList.workNum }">요청</label>
+																			</div>
+																										 
+																			<div class="form_radio_btn">
+																				<input id="wtRadio2${workList.workNum }" class="" type="radio" name="wtWorkStatusCode${workList.workNum }r" value="WKST02" <c:if test="${workList.workStatusCode eq 'WKST02' }">checked</c:if>>
+																				<label for="wtRadio2${workList.workNum }">진행</label>
+																			</div>
+				
+																			<div class="form_radio_btn">
+																				<input id="wtRadio3${workList.workNum }" class="" type="radio" name="wtWorkStatusCode${workList.workNum }r" value="WKST03" <c:if test="${workList.workStatusCode eq 'WKST03' }">checked</c:if>>
+																				<label for="wtRadio3${workList.workNum }">피드백</label>
+																			</div>
+				
+																			<div class="form_radio_btn">
+																				<input id="wtRadio4${workList.workNum }" class="" type="radio" name="wtWorkStatusCode${workList.workNum }r" value="WKST04" <c:if test="${workList.workStatusCode eq 'WKST04' }">checked</c:if>>
+																				<label for="wtRadio4${workList.workNum }">완료</label>
+																			</div>
+				
+																			<div class="form_radio_btn">
+																				<input id="wtRadio5${workList.workNum }" class="" type="radio" name="wtWorkStatusCode${workList.workNum }r" value="WKST05" <c:if test="${workList.workStatusCode eq 'WKST05' }">checked</c:if>>
+																				<label for="wtRadio5${workList.workNum }">보류</label>
+																			</div>
+																		</div>
+																	</div>
+															    </div>
+															    
+															    <div class="col-12 col-md-12 mb-3">
+														        <div class="form-group">
+														            <span class="material-symbols-rounded" style="margin-right:10px; margin-top:10px; float:left">account_circle</span>
+														            <div style="float:left; width:90%;">
+																    	<input type="text" class="form-control" value="${workList.assignMemId }" data-choices='{"silent": true,"removeItems": "true","removeItemButton": "", "itemSelectText":"", "readonly":"true"}'>
+														            </div>
+														        </div>
+														    </div>
+														    <br>
+														    <br>
+														    <br>
+														    
+														    <div class="col-12 col-md-4 mb-3">
+														        <div class="form-group">
+														            <span class="material-symbols-rounded" style="margin-right:10px; margin-top:5px; float:left;">calendar_today</span>
+														            <input class="form-control" id="wtWorkDateS${workList.workNum }" name="workStartDate" value="${workList.workStartDate }" type="text" style="width:80%;" readonly="readonly">
+														        </div>
+														    </div>
+														    <div class="col-12 col-md-4 mb-3">
+														        <div class="form-group">
+														            <span class="material-symbols-rounded" style="margin-right:10px; margin-top:5px; float:left;">calendar_today</span>
+														            <input class="form-control" id="wtWorkDateE${workList.workNum }" name="workEndDate" value="${workList.workEndDate }" type="text" style="width:80%;" readonly="readonly">
+														        </div>
+														    </div>
+														    
+														    <div class="col-12 col-md-4 mb-3">
+														        <div class="form-group">
+														            <span class="material-symbols-rounded" style="margin-right:10px; margin-top:10px; float:left;">Flag</span>
+														            <div style="float:left; width:80%;">
+														            	<select id="wtWorkPriority" class="form-control" name="workPriority"
+								                                            data-choices='{"searchEnabled":false, "itemSelectText":"" }'>
+								                                            <c:forEach items="${priCode }" var="priCode">
+													                           <option value="${priCode.comCode }" disabled="disabled" <c:if test="${workList.workPriority eq priCode.comCode }">selected</c:if>>${priCode.comCodeNm }</option>
+												                           </c:forEach>
+								                                        </select>
+														            </div>
+														        </div>
+														    </div>
+														    <br>
+														    <br>
+														    <br>
+														    
+														    <div class="col-12 col-md-6 mb-3">
+														        <div class="form-group">
+														            <span class="material-symbols-rounded" style="margin-right:10px; float:left;">Monitoring</span>
+																		 <div class="progress mb-3" style="height: 20px; width:55%; float:left">
+													                     <div class="progress-bar" role="progressbar"
+													                      aria-valuemin="0" aria-valuemax="100" style="width: ${workList.workProgress }%"></div>
+													                   	 </div>
+													                      <div style="float:left; margin-left:10px;">${workList.workProgress }%</div>
+														        </div>
+														    </div>
+														    <br>
+														    <br>
+														    
+														    <p>${workList.workContent }</p>
+										                    <c:forEach items="${workList.workFile.attatchList }" var="workFile">
+										                    <c:choose>
+										                    	<c:when test="${fn:substring(workFile.attatchType,0,5) == 'image'}">
+												                    <img src="/upload/${workFile.saveNm}" width=120px; height=120px; alt="image" style="margin-bottom:10px;"/>
+										                    	</c:when>
+										                    	<c:otherwise>
+										                    		<div class="p-3 border rounded-3 mb-1 d-flex align-items-center">
+										                    		
+										                    		<c:if test="${fn:containsIgnoreCase(workFile.attatchType, 'hwp')}">
+													        <img src="/resources/assets/img/projects/6.png" alt="" class="height-40 me-3 flex-shrink-0 w-auto">
+													       </c:if>
+													      <c:if test="${fn:containsIgnoreCase(workFile.attatchType, 'xlsx')}">
+													        <img src="/resources/assets/img/projects/4.png" alt="" class="height-40 me-3 flex-shrink-0 w-auto">
+													      </c:if>
+													      <c:if test="${fn:containsIgnoreCase(workFile.attatchType, 'zip')}">
+													        <img src="/resources/assets/img/projects/3.png" alt="" class="height-40 me-3 flex-shrink-0 w-auto">
+													      </c:if>
+													      <c:if test="${fn:containsIgnoreCase(workFile.attatchType, 'text')}">
+													        <img src="/resources/assets/img/projects/7.png" alt="" class="height-40 me-3 flex-shrink-0 w-auto">
+													      </c:if>
+										                    		
+<!-- 									                                  <img src="/resources/assets/media/icons/files/css.svg" class="height-40 me-3 flex-shrink-0 w-auto" alt=""> -->
+									                                  <div class="flex-grow-1 overflow-hidden">
+									                                    <p class="mb-1 lh-sm text-truncate">${workFile.originNm }</p>
+									                                    <div class="d-flex align-items-center justify-content-between">
+									                                      <small class="text-body-secondary">${workFile.attatchSize }KB</small>
+									                                      <a href="#!" class="text-body"
+									                                      href="/upload/${workFile.saveNm}"
+																			download="/upload/${workFile.originNm}">
+									                                        <span class="material-symbols-rounded align-middle">
+									                                          download
+									                                        </span>
+									                                      </a>
+									                                    </div>
+									                                  </div>
+									                                </div>
+									                                <small class="d-block text-body-secondary">${workFile.attatchDate }</small>
+										                    	</c:otherwise>
+										                    </c:choose>
+										                    </c:forEach>
+										                    
+										                    <div class="d-flex pb-3 mb-3 border-bottom align-items-center small">
+			                                                    <span class="fs-5 align-middle me-2 material-symbols-rounded d-flex align-items-center ms-auto">
+			                                                        comment</span>
+			                                                    <span>${workList.issueList.size()}</span>
+		                                                 	</div>
+		                                                
+		                                                	<!--Comments list-->
+		                                                    <ul class="list-group" id="wtComment-list${workList.workNum }">
+					                                            <c:forEach items="${workList.issueList }" var="issue">
+		                                                        <c:forEach items="${workList.colleagueVOList }" var="collIssue">
+		                                                        <c:if test="${issue.issueReq == collIssue.memId }">
+		                                                        <li class="list-group-item" id="wtIssueSelectDel${issue.issueNum }">
+		                                                            <div class="d-flex align-items-stretch" style="float:left;">
+		                                                                <a href="#!" class="flex-shrink-0 d-block me-2">
+		                                                                    <img src="${collIssue.memProfile }"
+		                                                                        class="avatar sm rounded-circle" alt="">
+		                                                                </a>
+		                                                                <!--Coomments and replies-->
+		                                                                <div>
+		                                                                    <div class="py-2 mb-1 px-3 rounded-3">
+		                                                                        <div class="d-flex">
+		                                                                            <h6 class="mb-0">${collIssue.memNick }</h6>
+		                                                                            <small class="text-body-secondary" style="margin-left:10px;">${issue.issueDate }</small>
+		                                                                        </div>
+		                                                                        <p class="mb-0">${issue.issueContent }</p>
+		                                                                    </div>
+		                                                                </div>
+		                                                            </div>
+		                                                            <div>
+																		<c:choose>
+																		<c:when test="${loginId == issue.issueReq }">
+			                                                             		<button type="button" id="wtIssueDel${issue.issueNum }" class="badge bg-danger-subtle text-danger" style="float: right; border:0px;">삭제</button>
+																		</c:when>
+																		<c:when test="${loginId == workList.myProjectVO.pjAdminId }">
+			                                                             		<button type="button" id="wtIssueDel${issue.issueNum }" class="badge bg-danger-subtle text-danger" style="float: right; border:0px;">삭제</button>
+																		</c:when>
+																		<c:otherwise></c:otherwise>
+																		</c:choose>
+		                                                            </div>
+		                                                        </li>
+		                                                        <input type="hidden" id="wtIssueNum${issue.issueNum }" name="issueNum" value="${issue.issueNum }" >
+		
+		                                                        <script type="text/javascript">
+		                                                        	$(function(){
+				                                                        var issueDel = $("#wtIssueDel${issue.issueNum }");
+				    													var issueNum = document.getElementById('wtIssueNum${issue.issueNum }');
+				    													
+				    													issueDel.on("click",function(){
+				    														if(confirm("정말로 삭제하시겠습니까?")){
+					    														console.log(issueNum.value);
+					    														$.ajax({
+					    															type : "post",
+					    															url : "/coco/issue/delete",
+					    															data : {
+					    																issueNum : issueNum.value
+					    															},
+					    															success : function(result){
+					    																$('#issueSelectDel${issue.issueNum }').remove();
+					    																$('#wtIssueSelectDel${issue.issueNum }').remove();
+					    															}
+					    														});
+			                                                        		}
+				    													});
+				    													
+		                                                        	});
+																</script>
+		
+																</c:if>
+																<!-- issueList 안에 collList 끝 -->
+		                                                        </c:forEach>
+		                                                        
+		                                                        <!-- issueList끝 -->
+		                                                        </c:forEach>
+		                                                        </ul>
+		                                                        
+		                                                        <ul class="list-group">
+		                                                        <li class="list-group-item bg-body">
+		                                                            <!--Add comment-->
+		                                                            <h6>Comment</h6>
+		                                                                <textarea id="wtIssueContent${workList.workNum }" name="issueContent" rows="2"
+		                                                                    class="form-control mb-2"></textarea>
+		                                                                <div class="text-end">
+		                                                                    <button type="button" class="btn btn-primary btn-sm" id="wtIssueBtn${workList.workNum }">
+		                                                                        작성</button>
+		                                                                </div>
+		                                                        </li>
+		                                                    </ul>
+														
+															<c:forEach items="${workList.colleagueVOList }" var="collIssue">
+															<c:if test="${loginId == collIssue.memId }">
+																<input type="hidden" id="wtMemProfile${coll.colNum }" name="" value="${collIssue.memProfile }" >
+																<input type="hidden" id="wtMemName${coll.colNum }" name="" value="${collIssue.memNick }" >
+															</c:if>
+															</c:forEach>
+		                                                	
+		                                                	<input type="hidden" id="wtWorkNum${workList.workNum }" name="workNum" value="${workList.workNum }" >
+				                                            <!--/.Post card end-->
+				                                            <script type="text/javascript">
+																$(function(){
+																	var issueBtn = $("#wtIssueBtn${workList.workNum }");
+																	var issueContent = document.getElementById('wtIssueContent${workList.workNum }');
+																	var workNum = document.getElementById('wtWorkNum${workList.workNum }');
+																	var memProfile = $("#wtMemProfile${coll.colNum }")
+																	var memName = $("#wtMemName${coll.colNum }")
+																	
+																	
+																	issueBtn.on("click", function(){
+																		console.log(issueContent.value);
+																		console.log(workNum.value);
+																		console.log(memProfile.val());
+																		console.log(memName.val());
+																		$.ajax({
+																			type : "post",
+																			url : "/coco/issue/register",
+																			data : {
+																				issueContent : issueContent.value,
+																				workNum : workNum.value
+																			},
+																			success : function(result){
+																				var insertIssueNum = result.issueNum;
+																				var newItem = '<li class="insertIssueSelectDel'+ insertIssueNum +' list-group-item" id="wtInsertIssueSelectDel'+ insertIssueNum +'">';
+																				newItem += '<div class="d-flex align-items-stretch" style="float:left;">';
+																				newItem += '<div class="d-flex align-items-stretch">';
+																				newItem += '<a href="#!" class="flex-shrink-0 d-block me-2">'; 
+																				newItem += '<img src="'+memProfile.val()+'" class="avatar sm rounded-circle" alt="">';  
+																	            newItem += '</a>';
+																	            newItem += '<div>';
+																	            newItem += '<div class="py-2 mb-1 px-3 rounded-3">';
+																	            newItem += '<div class="d-flex">';
+																	            newItem += '<h6 class="mb-0">'+ memName.val() +'</h6>';
+																	            newItem += '<small class="text-body-secondary" style="margin-left:10px;">'+result.issueDate +'</small>';
+																	            newItem += '</div>';
+																	            newItem += '<p class="mb-0">' + issueContent.value + '</p>';
+																	            newItem += '</div>';
+																	            newItem += '</div>';
+																	            newItem += '</div>';
+																	            newItem += '</div>';
+																	            newItem += '<button type="button" id="wtIssueDel' + result.issueNum + '" class="issueDel' + result.issueNum + ' badge bg-danger-subtle text-danger" style="float: right; border:0px;">삭제</button>';
+																	            newItem += '</div>';
+																	            newItem += '</li>';
+																	            
+// 																	            $('#comment-list${workList.workNum }').append(newItem);
+																	            $('#wtComment-list${workList.workNum }').append(newItem);
+																	            
+																	            issueContent.value = '';
+																	            
+		// 															            var insertIssueDelBtn = $("#wtIssueDel" + result.issueNum);
+																	            var wtInsertIssueDelBtn = $(".issueDel" + result.issueNum);
+																	            
+																	            wtInsertIssueDelBtn.on("click",function(){
+																					if(confirm("정말로 삭제하시겠습니까?")){
+							    														$.ajax({
+							    															type : "post",
+							    															url : "/coco/issue/delete",
+							    															data : {
+							    																issueNum : insertIssueNum
+							    															},
+							    															success : function(result){
+							    																$('.insertIssueSelectDel'+insertIssueNum).remove();
+							    																$('.wtInsertIssueSelectDel'+insertIssueNum).remove();
+							    															}
+							    														});
+							                                                		}
+																				});
+																	            
+																			}
+																		});
+																	});
+																	
+																});
+															</script>                                                	
+		                                                
+		                                                	</c:if>
+		                                                	</c:forEach>   		 
+				                                            </div>
+		                                                   	<!-- 사이드캔버스 바디  end-->
+		                                                   	
+		                                                   	</div>
+		                                                	
+		                                                </td>
+														</tr>
+													</c:forEach>
+												</c:otherwise>
+											</c:choose>
+										</table>
+										
+										<script type="text/javascript">
+					                      function sortTable(col) {
+											  var table, rows, switching, i, x, y, shouldSwitch;
+											  table = document.getElementById("datatable");
+											  switching = true;
+											  while (switching) {
+											    switching = false;
+											    rows = table.getElementsByTagName("tr");
+											    for (i = 1; i < (rows.length - 1); i++) {
+											      shouldSwitch = false;
+											      x = rows[i].getElementsByTagName("td")[col];
+											      y = rows[i + 1].getElementsByTagName("td")[col];
+											      if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+											        shouldSwitch = true;
+											        break;
+											      }
+											    }
+											    if (shouldSwitch) {
+											      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+											      switching = true;
+											    }
+											  }
+											}
+					                      </script>
+
+									</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+			</main>
+			<!--///////////Page content wrapper End///////////////-->
+		</div>
+	</div>
+
